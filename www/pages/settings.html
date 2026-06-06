@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('../assets/fonts/Inter.ttf') format('truetype');
+            font-weight: 100 900; 
+            font-display: swap;
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - Khata App</title>
+    
+
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    
+    <script>
+        tailwind.config = { 
+            darkMode: 'class',
+            theme: {
+               extend: {
+                  fontFamily: {
+                     sans: ['Inter', 'sans-serif'], 
+                  },
+                  colors: {
+                      master: 'var(--bg-master)',
+                      card: 'var(--bg-card)',
+                      primary: 'var(--text-primary)',
+                      secondary: 'var(--text-secondary)',
+                      brand: 'var(--brand-blue)',
+                      green: 'var(--status-green)',
+                      red: 'var(--status-red)',
+                      line: 'var(--border-line)',
+                  }
+               }
+            }
+        };
+    </script>
+    
+    <script src="../assets/js/theme.js"></script>
+
+    <script>
+        document.addEventListener('deviceready', function() {
+            document.addEventListener('backbutton', function (e) {
+                e.preventDefault();
+                window.location.replace('../index.html'); 
+            }, false);
+        }, false);
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+
+<body class="bg-master text-primary flex flex-col h-[100dvh] overflow-hidden transition-colors duration-300 relative">
+
+    <header class="sticky top-0 w-full h-14 px-4 flex items-center justify-between border-b border-line bg-master/70 backdrop-blur-xl transition-colors z-50">
+        <button onclick="window.location.replace('../index.html')" class="flex items-center gap-1 -ml-2 p-2 text-brand active:opacity-50 transition-opacity">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span class="text-[17px] font-medium">Back</span> 
+        </button>
+
+        <h1 class="absolute left-1/2 transform -translate-x-1/2 text-[17px] font-semibold tracking-wide">
+            Settings
+        </h1>
+        
+        <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2 text-brand active:opacity-50 transition-opacity">
+            <svg id="icon-sun" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg id="icon-moon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pt-6 pb-[100px]">
+        <div class="max-w-md mx-auto px-4">
+            
+            <div class="mb-6">
+                <span class="text-[13px] font-medium text-secondary uppercase block mb-1.5 px-3">Security</span>
+                
+                <div class="bg-card rounded-2xl overflow-hidden shadow-sm transition-colors">
+                    
+                    <div class="flex items-center p-4 transition-colors">
+                        <div class="p-1.5 bg-brand text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <div>
+                                <p class="font-normal text-[16px] leading-tight">App Lock</p>
+                                <p class="font-normal text-[13px] text-secondary leading-snug">Require native lock to open app</p>
+                            </div>
+                            <div class="w-12 h-6 bg-[#E9E9EA] dark:bg-[#39393D] rounded-full flex items-center p-0.5 cursor-pointer transition-colors duration-300" id="app-lock-toggle" onclick="toggleSwitch(this)">
+                                <div class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ml-16 mr-4 border-b border-line"></div>
+
+                    <a href="#" onclick="event.preventDefault(); window.location.replace('security_verify.html?action=change_pin')" class="flex items-center p-4 active:opacity-70 transition-colors cursor-pointer block">
+                        <div class="p-1.5 bg-brand text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" viewBox="2 2 20 20">
+                                <path d="M 7 16.5 L 7 18 A 2 2 0 0 0 9 20 L 15 20 A 2 2 0 0 0 17 18 L 17 6 A 2 2 0 0 0 15 4 L 9 4 A 2 2 0 0 0 7 6 L 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="M 11 17.5 H 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <rect x="3.5" y="11" width="6.5" height="4.5" rx="1.2" fill="currentColor" />
+                                <path d="M 5.25 11 V 9 A 1.5 1.5 0 0 1 8.25 9 V 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <div>
+                                <p class="font-normal text-[16px] leading-tight">Change App PIN</p>
+                                <p class="font-normal text-[13px] text-secondary leading-snug">Custom PIN for Edit & Delete</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div class="ml-16 mr-4 border-b border-line"></div>
+
+                    <div class="flex items-center p-4 transition-colors">
+                        <div class="p-1.5 bg-brand text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <div>
+                                <p class="font-normal text-[16px] leading-tight">Biometric Security</p>
+                                <p class="font-normal text-[13px] text-secondary leading-snug">Use fingerprint for actions</p>
+                            </div>
+                            <div class="w-12 h-6 bg-[#E9E9EA] dark:bg-[#39393D] rounded-full flex items-center p-0.5 cursor-pointer transition-colors duration-300" id="bio-toggle" onclick="toggleSwitch(this)">
+                                <div class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <span class="text-[13px] font-medium text-secondary uppercase block mb-1.5 px-3">Data & Backup</span>
+                
+                <div class="bg-card rounded-2xl overflow-hidden shadow-sm transition-colors">
+                    
+                    <a href="#" onclick="backupData(event)" class="flex items-center p-4 active:opacity-70 transition-colors cursor-pointer block">
+                        <div class="p-1.5 bg-brand text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <p class="font-normal text-[16px]">Backup Data</p>
+                        </div>
+                    </a>
+
+                    <div class="ml-16 mr-4 border-b border-line"></div>
+
+                    <a href="#" onclick="triggerRestore(event)" class="flex items-center p-4 active:opacity-70 transition-colors cursor-pointer block">
+                        <div class="p-1.5 bg-brand text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <p class="font-normal text-[16px]">Restore Data</p>
+                        </div>
+                    </a>
+                    <input type="file" id="restore-file-input" accept=".zip, application/zip, application/x-zip-compressed, .json, application/json" class="hidden" onchange="handleRestore(event)">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <span class="text-[13px] font-medium text-red uppercase block mb-1.5 px-3">Danger Zone</span>
+                
+                <div class="bg-card rounded-2xl overflow-hidden shadow-sm transition-colors">
+                    <a href="#" onclick="triggerClearData(event)" class="flex items-center p-4 active:bg-red/10 transition-colors cursor-pointer block">
+                        <div class="p-1.5 bg-red text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </div>
+                        <div class="flex-1 flex items-center justify-between ml-4">
+                            <p class="font-normal text-[16px] text-red">Clear All Data</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="custom-toast" class="fixed bottom-[30px] left-1/2 transform -translate-x-1/2 z-[70] px-5 py-3.5 rounded-full shadow-2xl transition-all duration-300 translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 whitespace-nowrap bg-card/80 backdrop-blur-md border border-line">
+        <svg id="toast-icon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"></svg>
+        <span id="toast-msg" class="text-[15px] font-medium tracking-wide text-primary"></span>
+    </div>
+
+    <script src="../assets/js/ui.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script src="../assets/js/settings.js"></script>
+    <script src="../assets/js/jszip.min.js"></script>
+    <script src="../assets/js/backup_system.js"></script>
+    <script src="../cordova.js"></script>
+</body>
+</html>

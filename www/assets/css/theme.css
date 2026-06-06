@@ -1,0 +1,39 @@
+/* =========================================
+   MASTER COLOR THEME (Apple iOS Style)
+   ========================================= */
+
+/* ☀️ LIGHT MODE (Din) - Default */
+:root {
+    --bg-master: #F2F2F7;
+    --bg-card: #FFFFFF;
+    --text-primary: #000000;
+    --text-secondary: #8E8E93;
+    
+    /* Apple True Light Blue */
+    --brand-blue: #007AFF; 
+    
+    --status-green: #34C759;
+    --status-red: #FF3B30;
+    --border-line: #C6C6C8;
+   
+    --bg-avatar: #8E8E93; /* Apple Light Mode System Gray */
+
+}
+
+/* 🌙 DARK MODE (Raat) - JS add karega '.dark' class */
+.dark {
+    --bg-master: #000000;
+    --bg-card: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #98989D;
+    
+    /* Apple True Dark/Neon Blue */
+    --brand-blue: #0A84FF; 
+    
+    --status-green: #30D158;
+    --status-red: #FF453A;
+    --border-line: #38383A;
+   
+    --bg-avatar: #636366; /* Apple Dark Mode System Gray */
+
+}
