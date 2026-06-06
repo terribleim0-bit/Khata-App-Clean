@@ -200,10 +200,34 @@ function renderCustomers(customers) {
             statusText = 'Due';
         }
 
-        const subTextHTML = cust.last_activity_text ? 
-            `<svg class="w-3.5 h-3.5 mr-1 inline-block text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span class="truncate">${cust.last_activity_text}</span>` 
-            : 
-            `<svg class="w-3.5 h-3.5 mr-1 inline-block text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> <span class="truncate">New Customer Added</span>`; 
+        let subTextHTML = '';
+        if (cust.last_activity_text) {
+            const activityLower = cust.last_activity_text.toLowerCase();
+            let iconSvg = '';
+            
+            // Icon logic based on activity type
+            if (activityLower.includes('deleted')) {
+                // Red trash icon for delete
+                iconSvg = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+            } else if (activityLower.includes('edited')) {
+                // Blue edit icon for edit
+                iconSvg = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>`;
+            } else if (activityLower.includes('received')) {
+                // Green arrow down for payment received
+                iconSvg = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>`;
+            } else if (activityLower.includes('credit')) {
+                // Red arrow up for credit given
+                iconSvg = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>`;
+            } else {
+                // Default checkmark for generic updates
+                iconSvg = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+            }
+            
+            subTextHTML = `${iconSvg} <span class="truncate">${cust.last_activity_text}</span>`;
+        } else {
+            // Default "New Customer Added" if no activity text is present
+            subTextHTML = `<svg class="w-3.5 h-3.5 mr-1 inline-block text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> <span class="truncate">New Customer Added</span>`;
+        }
 
         // home.js vich itemHTML nu is naal replace kar
         const itemHTML = `
@@ -251,4 +275,38 @@ function renderCustomers(customers) {
             }
         }
     }
+}
+// ===============================================
+// 🟢 KEYBOARD DETECTION LOGIC (Hide Bottom Nav)
+// ===============================================
+const bottomNav = document.getElementById('bottom-nav');
+let initialWindowHeight = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    // If the window height decreases by more than 150px, keyboard is likely open
+    if (window.innerHeight < initialWindowHeight - 150) {
+        if (bottomNav) {
+            bottomNav.style.display = 'none';
+        }
+    } else {
+        // Keyboard closed, show nav again
+        if (bottomNav) {
+            bottomNav.style.display = 'flex';
+        }
+        // Update initial height in case of device rotation
+        initialWindowHeight = window.innerHeight; 
+    }
+});
+
+// Also hide nav strictly when search input is focused
+if (searchInput) {
+    searchInput.addEventListener('focus', () => {
+        if (bottomNav) bottomNav.style.display = 'none';
+    });
+    searchInput.addEventListener('blur', () => {
+         // Use setTimeout to allow click events elsewhere to process before nav reappears
+        setTimeout(() => {
+             if (bottomNav) bottomNav.style.display = 'flex';
+        }, 100);
+    });
 }

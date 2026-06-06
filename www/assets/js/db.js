@@ -21,6 +21,7 @@ document.addEventListener('deviceready', function() {
     window.db.transaction(function(tx) {
         
         // --- Asli Tables Create Karna ---
+        // Base structure banaya. (Duplicate code removed)
         tx.executeSql('CREATE TABLE IF NOT EXISTS customers (id TEXT PRIMARY KEY, name TEXT, balance REAL)');
         tx.executeSql('CREATE TABLE IF NOT EXISTS transactions (id TEXT PRIMARY KEY, customer_id TEXT, amount REAL, type TEXT, note TEXT, date INTEGER, bill_paths TEXT)');
 

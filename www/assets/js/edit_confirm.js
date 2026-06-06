@@ -77,11 +77,16 @@ document.addEventListener('deviceready', () => {
         if (isSubmitting) return; // Stop double clicks
 
         let finalAmount = 0;
-        try { finalAmount = eval(amountStr.replace(/[^0-9+\-*/.]/g, '')); } catch(e) { finalAmount = parseFloat(amountStr); }
+        try { 
+            finalAmount = eval(amountStr.replace(/[^0-9+\-*/.]/g, '')); 
+        } catch(e) { 
+            finalAmount = parseFloat(amountStr); 
+        }
         if(isNaN(finalAmount)) finalAmount = parseFloat(amountStr);
 
         if (!finalAmount || finalAmount <= 0) {
-            showError("Please enter a valid amount.");
+            // showError function tuhade base code vich define hona chahida hai
+            alert("Please enter a valid amount."); 
             return;
         }
 
@@ -100,37 +105,44 @@ document.addEventListener('deviceready', () => {
             window.location.replace(`security_verify.html?action=edit_entry`);
         } else {
             const currentTime = Date.now();
-            db.transaction(function(txUpdate) {
-                txUpdate.executeSql('UPDATE transactions SET amount = ?, is_edited = 1, edited_on = ? WHERE id = ?', 
+            
+            // 🟢 SINGLE TRANSACTION BLOCK FOR ATOMICITY
+            db.transaction(function(tx) {
+                
+                // Step 1: Update the specific transaction
+                tx.executeSql('UPDATE transactions SET amount = ?, is_edited = 1, edited_on = ? WHERE id = ?', 
                     [finalAmount, currentTime, txnId]);
+
+                // Step 2: Recalculate net balance
+                tx.executeSql('SELECT type, amount FROM transactions WHERE customer_id = ? AND (is_deleted IS NULL OR is_deleted = 0)', 
+                    [custId], 
+                    function(tx, rsCalc) {
+                        let netBal = 0;
+                        for(let i = 0; i < rsCalc.rows.length; i++) {
+                            let t = rsCalc.rows.item(i);
+                            netBal += (t.type === 'given') ? -parseFloat(t.amount) : parseFloat(t.amount);
+                        }
+
+                        // Step 3: Update customer balance AND last_activity_text
+                        // Eh executeSql calculation de success block vich hai taaki netBal exactly calculate hon baad challey
+                        const activityText = 'Entry Edited';
+                        tx.executeSql('UPDATE customers SET balance = ?, updated_at = ?, last_activity_text = ? WHERE id = ?', 
+                            [netBal, currentTime, activityText, custId]);
+                    }
+                );
+
             }, function(error) {
-                alert("Edit Error: " + error.message);
+                // Eh error block saari transaction nu cover karega. Agar koi vi query fail hoyi, eh trigger hovega.
+                alert("Database Error: " + error.message);
+                
                 // Unlock on fail
                 isSubmitting = false;
                 document.getElementById('save-btn').disabled = false;
                 document.getElementById('save-btn').style.opacity = "1";
                 document.getElementById('save-btn').innerHTML = originalText;
             }, function() {
-                let netBal = 0;
-                db.transaction(function(txCalc) {
-                    txCalc.executeSql('SELECT type, amount FROM transactions WHERE customer_id = ? AND (is_deleted IS NULL OR is_deleted = 0)', [custId], function(txCalc, rsCalc) {
-                        for(let i = 0; i < rsCalc.rows.length; i++) {
-                            let t = rsCalc.rows.item(i);
-                            netBal += (t.type === 'given') ? -parseFloat(t.amount) : parseFloat(t.amount);
-                        }
-                    });
-                }, function(err) {
-                    alert("Balance Calculation Error: " + err.message);
-                }, function() {
-                    db.transaction(function(txBalUpdate) {
-                        txBalUpdate.executeSql('UPDATE customers SET balance = ?, updated_at = ? WHERE id = ?', [netBal, currentTime, custId]);
-                    }, function(err) {
-                        alert("Balance Update Error: " + err.message);
-                    }, function() {
-                        // FIX: Replaced window.location with history.back()
-                        setTimeout(() => { history.back(); }, 100);
-                    });
-                });
+                // Eh success block sirf tad chalega jadon saariyan queries bina kisi error de execute ho jangiyan.
+                setTimeout(() => { history.back(); }, 100);
             });
         }
     };
