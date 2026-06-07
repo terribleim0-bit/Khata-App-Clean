@@ -166,6 +166,7 @@ function loadCustomersFromDB() {
 }
 
 // Render Customers & Update Net Balance
+// Render Customers & Update Net Balance
 function renderCustomers(customers) {
     if (!listContainer) return;
 
@@ -176,7 +177,7 @@ function renderCustomers(customers) {
                 <p class="text-[15px] font-medium">No customers found.</p>
             </div>`;
         
-        if (accountCountEl) accountCountEl.textContent = '0 Accounts';
+        if (accountCountEl) accountCountEl.innerHTML = '0 Accounts';
         if (totalBalanceEl) {
             totalBalanceEl.textContent = '₹0';
             totalBalanceEl.className = 'text-[17px] font-semibold text-primary';
@@ -195,7 +196,9 @@ function renderCustomers(customers) {
         const bal = parseFloat(cust.balance) || 0;
         totalNet += bal;
         
-        // Use Master theme colors for text
+        // 1. Indian Comma Format (e.g., 10,00,000)
+        const formattedBal = Math.abs(bal).toLocaleString('en-IN');
+        
         let balClass = 'text-primary';
         let statusText = 'Settled';
         
@@ -209,40 +212,41 @@ function renderCustomers(customers) {
 
         let subTextHTML = '';
         if (cust.last_activity_text) {
-            // Sirf grey rang (text-secondary), theeka SVG (Tick), aur wrap hon di azaadi (no truncate)
+            // Lami line nu ik line vich lock karan layi 'truncate' aur 'min-w-0'
             subTextHTML = `
-                <div class="flex items-start gap-1.5 mt-1 text-secondary">
-                    <svg class="w-[11px] h-[11px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[11px] tracking-tight break-words leading-tight">${cust.last_activity_text}</span>
+                    <span class="text-[13px] tracking-wide truncate">${cust.last_activity_text}</span>
                 </div>`;
         } else {
-            // Default: Profile SVG aur "Added"
+            // 2. Default text vich "Customer" word kadd ke Profile SVG laya hai
+            // Note: cust.created_at di jagah database wali date field lagao je available hai
+            const dateAdded = cust.created_at ? cust.created_at : 'Recently'; 
             subTextHTML = `
-                <div class="flex items-start gap-1.5 mt-1 text-secondary">
-                    <svg class="w-[11px] h-[11px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[10px] tracking-tight break-words leading-tight">Added</span>
+                    <span class="text-[13px] tracking-wide truncate">Added On ${dateAdded}</span>
                 </div>`;
         }
 
-        // itemHTML vich p tag nu hata ke sidha subTextHTML render kitta hai taaki spacing theek rave
         const itemHTML = `
             <a href="pages/ledger.html?id=${cust.id}" class="group flex items-center pl-4 transition-all cursor-pointer active:scale-[0.98] active:opacity-70 block">
                 <div class="w-10 h-10 rounded-full bg-avatar text-white flex items-center justify-center font-semibold text-[17px] shrink-0 uppercase">
                     ${cust.name.charAt(0)}
                 </div>
                 <div class="flex-1 flex flex-col justify-center ml-3">
-                    <div class="py-3 pr-4 flex justify-between items-start">
+                    <div class="py-3 pr-4 flex justify-between items-center">
                         <div class="min-w-0 pr-2">
-                            <h3 class="text-[14px] font-normal text-primary truncate">${cust.name}</h3>
+                            <h3 class="text-[16px] font-normal text-primary truncate">${cust.name}</h3>
                             ${subTextHTML}
                         </div>
-                        <div class="text-right shrink-0 mt-0.5">
-                            <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${Math.abs(bal)}</p>
-                            <p class="text-[11px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
+                        <div class="text-right shrink-0">
+                            <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${formattedBal}</p>
+                            <p class="text-[13px] text-secondary mt-0.5 tracking-wide">${statusText}</p>
                         </div>
                     </div>
                     <div class="h-[1px] bg-line mr-4 group-last:hidden"></div>
@@ -255,10 +259,19 @@ function renderCustomers(customers) {
 
     if (customers === allCustomers) {
         if (accountCountEl) {
-            accountCountEl.textContent = `${customers.length} Accounts`;
+            // 3. Net Balance de thalle Account count de naal Profile SVG
+            accountCountEl.innerHTML = `
+                <div class="flex items-center gap-1 text-secondary mt-0.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-[13px] tracking-wide">${customers.length} Accounts</span>
+                </div>`;
         }
         if (totalBalanceEl && totalStatusEl) {
-            totalBalanceEl.textContent = `₹${Math.abs(totalNet)}`;
+            // Net balance vich vi comma format apply kitta hai
+            const formattedTotalNet = Math.abs(totalNet).toLocaleString('en-IN');
+            totalBalanceEl.textContent = `₹${formattedTotalNet}`;
             
             if (totalNet > 0) {
                 totalStatusEl.textContent = 'You Give';
@@ -273,6 +286,7 @@ function renderCustomers(customers) {
         }
     }
 }
+
 
 // ===============================================
 // 🟢 KEYBOARD DETECTION LOGIC (Hide Bottom Nav)
