@@ -102,27 +102,25 @@
         </div>
 
         <!-- Search Header -->
-        <div id="header-search" class="absolute top-0 left-0 w-full h-full flex items-center gap-3 px-4 box-border bg-master transition-opacity duration-300 opacity-0 pointer-events-none">
-            
-            <div class="flex-1 flex items-center gap-2 bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 transition-colors min-w-0">
-                
+        <div id="header-search" class="absolute top-0 left-0 w-full h-full flex items-center gap-3 px-4 box-border bg-master transition-opacity duration-300 opacity-0 pointer-events-none z-10">
+            <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 min-w-0">
                 <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 
-                <input type="text" id="search-input" class="flex-1 w-0 min-w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 p-0" placeholder="Search customers...">
+                <input type="text" id="search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 px-2" placeholder="Search customers...">
                 
-                <button id="btn-clear-search" class="hidden flex-none p-1 text-gray-400 dark:text-gray-500 active:opacity-50 outline-none">
+                <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 outline-none">
                     <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                     </svg>
                 </button>
             </div>
-
-            <button id="cancel-search-btn" class="text-[17px] text-brand font-normal active:scale-[0.98] active:opacity-50 shrink-0 transition-all outline-none">
+            <button id="cancel-search-btn" class="text-[17px] text-brand font-normal active:opacity-50 shrink-0 outline-none">
                 Cancel
             </button>
         </div>
+
 
     </header>
 
@@ -130,7 +128,7 @@
     <main class="flex-1 px-4 py-4 overflow-y-auto pb-24 relative" id="main-scroll-area">
         
         <!-- Net Balance Card -->
-        <div id="net-balance-card" class="bg-card rounded-2xl px-5 py-4 flex justify-between items-start mb-4 shadow-sm transition-all duration-300 fade-transition relative z-10">
+        <div id="net-balance-card" class="bg-card rounded-2xl px-5 py-3 flex justify-between items-start mb-4 shadow-sm transition-all duration-300 fade-transition relative z-10">
             <div>
                 <h2 class="text-[17px] font-semibold text-primary tracking-wide">Net Balance</h2>
                 <p id="account-count" class="text-[13px] text-secondary mt-0.5 tracking-wide">
@@ -159,21 +157,22 @@
     </div>
 
     <!-- Bottom Tab Bar -->
-    <nav id="bottom-nav" class="fixed bottom-0 w-full h-[60px] bg-master/90 backdrop-blur-md border-t border-line flex justify-around items-center z-40 transition-colors pb-safe">
-
-        <a href="#" class="flex flex-col items-center p-2 text-brand active:scale-[0.98] active:opacity-70 transition-all">
-            <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-master border-t border-line flex justify-around items-center h-[65px] pb-safe z-50">
+        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-brand">
+            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
-            <span class="text-[11px] font-medium tracking-wide">Home</span>
+            <span class="text-[10px] font-medium">Home</span>
         </a>
-        <a href="pages/settings.html" class="flex flex-col items-center p-2 text-secondary hover:text-brand active:scale-[0.98] active:opacity-70 transition-all">
-            <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+        <a href="pages/settings.html" class="flex flex-col items-center justify-center w-full h-full text-secondary active:opacity-70">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <span class="text-[11px] font-medium tracking-wide">Settings</span>
+            <span class="text-[10px] font-medium">Settings</span>
         </a>
     </nav>
+
 
     <script src="assets/js/db.js"></script>
     <script src="cordova.js"></script>

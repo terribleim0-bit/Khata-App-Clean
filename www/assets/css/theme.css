@@ -879,6 +879,11 @@ video {
   margin-right: auto;
 }
 
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -1227,6 +1232,10 @@ video {
 
 .h-full {
   height: 100%;
+}
+
+.h-\[65px\] {
+  height: 65px;
 }
 
 .max-h-0 {
