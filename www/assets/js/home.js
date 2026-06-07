@@ -215,16 +215,16 @@ function renderCustomers(customers) {
                     <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide break-words leading-tight">${cust.last_activity_text}</span>
+                    <span class="text-[10px] tracking-tight break-words leading-tight">${cust.last_activity_text}</span>
                 </div>`;
         } else {
-            // Default: Profile SVG aur "Customer Added"
+            // Default: Profile SVG aur "Added"
             subTextHTML = `
                 <div class="flex items-start gap-1.5 mt-1 text-secondary">
                     <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide break-words leading-tight">Customer Added</span>
+                    <span class="text-[10px] tracking-tight break-words leading-tight">Added</span>
                 </div>`;
         }
 
@@ -242,7 +242,7 @@ function renderCustomers(customers) {
                         </div>
                         <div class="text-right shrink-0 mt-0.5">
                             <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${Math.abs(bal)}</p>
-                            <p class="text-[13px] text-secondary mt-0.5 tracking-wide">${statusText}</p>
+                            <p class="text-[10px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
                         </div>
                     </div>
                     <div class="h-[1px] bg-line mr-4 group-last:hidden"></div>

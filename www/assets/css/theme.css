@@ -879,11 +879,6 @@ video {
   margin-right: auto;
 }
 
-.mx-4 {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -1230,12 +1225,12 @@ video {
   height: 64px;
 }
 
-.h-full {
-  height: 100%;
+.h-\[75px\] {
+  height: 75px;
 }
 
-.h-\[65px\] {
-  height: 65px;
+.h-full {
+  height: 100%;
 }
 
 .max-h-0 {
@@ -4294,10 +4289,6 @@ video {
 
 .hover\:bg-white\/20:hover {
   background-color: rgb(255 255 255 / 0.2);
-}
-
-.hover\:text-brand:hover {
-  color: var(--brand-blue);
 }
 
 .focus\:outline-none:focus {
