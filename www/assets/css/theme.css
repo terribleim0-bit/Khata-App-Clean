@@ -1233,6 +1233,10 @@ video {
   height: 100%;
 }
 
+.h-\[11px\] {
+  height: 11px;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
@@ -1356,6 +1360,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[11px\] {
+  width: 11px;
 }
 
 .min-w-0 {

@@ -212,16 +212,16 @@ function renderCustomers(customers) {
             // Sirf grey rang (text-secondary), theeka SVG (Tick), aur wrap hon di azaadi (no truncate)
             subTextHTML = `
                 <div class="flex items-start gap-1.5 mt-1 text-secondary">
-                    <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <svg class="w-[11px] h-[11px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[10px] tracking-tight break-words leading-tight">${cust.last_activity_text}</span>
+                    <span class="text-[11px] tracking-tight break-words leading-tight">${cust.last_activity_text}</span>
                 </div>`;
         } else {
             // Default: Profile SVG aur "Added"
             subTextHTML = `
                 <div class="flex items-start gap-1.5 mt-1 text-secondary">
-                    <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-[11px] h-[11px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     <span class="text-[10px] tracking-tight break-words leading-tight">Added</span>
@@ -237,12 +237,12 @@ function renderCustomers(customers) {
                 <div class="flex-1 flex flex-col justify-center ml-3">
                     <div class="py-3 pr-4 flex justify-between items-start">
                         <div class="min-w-0 pr-2">
-                            <h3 class="text-[16px] font-normal text-primary truncate">${cust.name}</h3>
+                            <h3 class="text-[14px] font-normal text-primary truncate">${cust.name}</h3>
                             ${subTextHTML}
                         </div>
                         <div class="text-right shrink-0 mt-0.5">
                             <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${Math.abs(bal)}</p>
-                            <p class="text-[10px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
+                            <p class="text-[11px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
                         </div>
                     </div>
                     <div class="h-[1px] bg-line mr-4 group-last:hidden"></div>
