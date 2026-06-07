@@ -132,10 +132,13 @@ document.querySelectorAll('.key-btn').forEach(btn => {
         else if (val === '=') {
             try {
                 if (/[+\-*/.]$/.test(amountStr)) amountStr = amountStr.slice(0, -1);
-                let res = eval(amountStr);
+                // 🟢 FIX: String nu sanitize karo (Sirf numbers te math operators allow karo)
+                let sanitizedStr = amountStr.replace(/[^0-9+\-*/.]/g, '');
+                let res = eval(sanitizedStr);
                 if(isNaN(res) || !isFinite(res)) res = 0; 
                 amountStr = Number.isInteger(res) ? res.toString() : res.toFixed(2);
             } catch(err) { 
+ 
                 if(window.showAppToast) showAppToast("Invalid calculation.");
                 return; 
             }
@@ -462,17 +465,24 @@ document.getElementById('confirm-btn').addEventListener('click', function() {
     let newBalance = parseFloat(customer.balance) || 0;
     newBalance = isGiven ? newBalance - finalAmount : newBalance + finalAmount;
 
-    // 🟢 Generate dynamic activity text
-    const activityText = isGiven ? `Credit Given: ₹${finalAmount}` : `Payment Received: ₹${finalAmount}`;
+    // 🟢 Generate formatted text without HTML
+    // FIX: window. prefix lagaya taaki global function theek tarah access hove
+    const dateStr = window.getFormattedDate(finalDateTimestamp);
+
+    // Format: "₹10 Credit Added on 2 May, 2026" ya "₹12 Payment Added on 2 May, 2026"
+    const activityText = isGiven ? 
+        `₹${finalAmount} Credit Added on ${dateStr}` : 
+        `₹${finalAmount} Payment Added on ${dateStr}`;
 
     db.transaction(function(tx) {
         tx.executeSql('INSERT INTO transactions (id, customer_id, amount, type, note, date, bill_paths) VALUES (?, ?, ?, ?, ?, ?, ?)', 
             [txnId, customer.id, finalAmount, txnType, noteText, finalDateTimestamp, finalBillPaths]);
         
-        // 🟢 Use UPDATE to safely modify existing customer data without losing other fields
         tx.executeSql('UPDATE customers SET balance = ?, last_activity_text = ? WHERE id = ?', 
             [newBalance, activityText, customer.id]);
             
+    
+
     }, function(error) {
         if(window.showAppToast) showAppToast("Failed to save entry. Please try again.");
         isSubmitting = false;

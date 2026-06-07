@@ -103,18 +103,23 @@
 
         <!-- Search Header -->
         <div id="header-search" class="absolute top-0 left-0 w-full h-full flex items-center gap-3 px-4 box-border bg-master transition-opacity duration-300 opacity-0 pointer-events-none">
-            <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] px-3 py-1.5 transition-colors min-w-0">
-                <svg class="w-[20px] h-[20px] text-gray-500 shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            
+            <div class="flex-1 flex items-center gap-2 bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 transition-colors min-w-0">
+                
+                <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
-                <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 p-0" placeholder="Search customers...">
                 
-                <button id="btn-clear-search" class="hidden text-gray-400 dark:text-gray-500 active:opacity-50 shrink-0 outline-none">
+                <input type="text" id="search-input" class="flex-1 w-0 min-w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 p-0" placeholder="Search customers...">
+                
+                <button id="btn-clear-search" class="hidden flex-none p-1 text-gray-400 dark:text-gray-500 active:opacity-50 outline-none">
                     <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                     </svg>
                 </button>
+                
             </div>
+
             <button id="cancel-search-btn" class="text-[17px] text-brand font-normal active:scale-[0.98] active:opacity-50 shrink-0 transition-all outline-none">
                 Cancel
             </button>

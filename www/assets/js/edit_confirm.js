@@ -85,10 +85,10 @@ document.addEventListener('deviceready', () => {
         if(isNaN(finalAmount)) finalAmount = parseFloat(amountStr);
 
         if (!finalAmount || finalAmount <= 0) {
-            // showError function tuhade base code vich define hona chahida hai
-            alert("Please enter a valid amount."); 
+            showError("Please enter a valid amount."); 
             return;
         }
+
 
         // Lock the button
         isSubmitting = true;
@@ -125,9 +125,18 @@ document.addEventListener('deviceready', () => {
 
                         // Step 3: Update customer balance AND last_activity_text
                         // Eh executeSql calculation de success block vich hai taaki netBal exactly calculate hon baad challey
-                        const activityText = 'Entry Edited';
+                                                // Step 3: Update customer balance AND last_activity_text
+                        
+                        // 🟢 Dynamic Activity Text Generator
+                        const dateStr = window.getFormattedDate(currentTime);
+                        const isGiven = (foundTxn.type === 'given');
+                        const activityText = isGiven ? 
+                            `₹${finalAmount} Credit Edited on ${dateStr}` : 
+                            `₹${finalAmount} Payment Edited on ${dateStr}`;
+
                         tx.executeSql('UPDATE customers SET balance = ?, updated_at = ?, last_activity_text = ? WHERE id = ?', 
                             [netBal, currentTime, activityText, custId]);
+
                     }
                 );
 

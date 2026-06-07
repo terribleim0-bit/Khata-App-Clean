@@ -43,39 +43,42 @@ document.addEventListener('deviceready', () => {
                     if (confirm("Are you sure you want to delete this entry?")) {
                         const currentTime = Date.now();
                         
-                        db.transaction(function(txDel) {
-                            // Soft Delete (is_deleted = 1)
-                            txDel.executeSql('UPDATE transactions SET is_deleted = 1, deleted_on = ? WHERE id = ?', [currentTime, txnId]);
-                        }, function(error) {
-                            if(window.showToast) showToast("Entry Delete Error: " + error.message);
-                        }, function() {
-                            // Delete hon ton baad Balance wapas Recalculate karke save karna
-                            let netBal = 0;
-                            db.transaction(function(txCalc) {
-                                // Sirf ohna entries nu gino jehriyan delete nahi hoyian
-                                txCalc.executeSql('SELECT type, amount FROM transactions WHERE customer_id = ? AND (is_deleted IS NULL OR is_deleted = 0)', [custId], function(txCalc, rsCalc) {
+                        // 🟢 FIX 1: Generate dynamic activity text for deletion
+                        const dateStr = window.getFormattedDate(currentTime);
+                        const activityText = `₹${txn.amount} Entry Deleted on ${dateStr}`;
+                        
+                        // 🟢 FIX 2: SINGLE TRANSACTION BLOCK FOR ATOMICITY
+                        db.transaction(function(tx) {
+                            
+                            // Step 1: Soft Delete the transaction
+                            tx.executeSql('UPDATE transactions SET is_deleted = 1, deleted_on = ? WHERE id = ?', 
+                                [currentTime, txnId]);
+
+                            // Step 2: Recalculate Balance
+                            tx.executeSql('SELECT type, amount FROM transactions WHERE customer_id = ? AND (is_deleted IS NULL OR is_deleted = 0)', 
+                                [custId], 
+                                function(tx, rsCalc) {
+                                    let netBal = 0;
                                     for(let i = 0; i < rsCalc.rows.length; i++) {
                                         let t = rsCalc.rows.item(i);
                                         netBal += (t.type === 'given') ? -parseFloat(t.amount) : parseFloat(t.amount);
                                     }
-                                });
-                            }, function(err) {
-                                if(window.showToast) showToast("Balance Calculation Error: " + err.message);
-                            }, function() {
-                                // Nawa Balance Customer table ch update karo
-                                db.transaction(function(txUpdate) {
-                                    txUpdate.executeSql('UPDATE customers SET balance = ?, updated_at = ? WHERE id = ?', [netBal, currentTime, custId]);
-                                }, function(err) {
-                                    if(window.showToast) showToast("Balance Update Error: " + err.message);
-                                }, function() {
-                                    // 🟢 THE MAGIC FIX: Replace nu hata ke history.back() laya
-                                    // Eh tuhanu wapas "Entry Details" te bhejega, jo ki hun instantly "DELETED" state ch badal jayega!
-                                    if(window.showToast) showToast("Entry deleted successfully");
-                                    setTimeout(() => {
-                                        history.back();
-                                    }, 100);
-                                });
-                            });
+
+                                    // Step 3: Update Customer Balance AND last_activity_text
+                                    tx.executeSql('UPDATE customers SET balance = ?, updated_at = ?, last_activity_text = ? WHERE id = ?', 
+                                        [netBal, currentTime, activityText, custId]);
+                                }
+                            );
+
+                        }, function(error) {
+                            // Single error block catches any failure in the above 3 steps
+                            if(window.showToast) showToast("Entry Delete Error: " + error.message);
+                        }, function() {
+                            // Success block runs only if ALL steps succeed
+                            if(window.showToast) showToast("Entry deleted successfully");
+                            setTimeout(() => {
+                                history.back();
+                            }, 100);
                         });
                     }
                 }

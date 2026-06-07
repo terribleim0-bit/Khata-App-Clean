@@ -1,6 +1,12 @@
 // ==========================================
 // 🎨 UI.JS - GLOBAL APP UI COMPONENTS
 // ==========================================
+// 🟢 GLOBAL HELPER: Get Formatted Date (e.g., "2 May, 2026")
+window.getFormattedDate = function(timestamp) {
+    const d = timestamp ? new Date(timestamp) : new Date();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
+};
 
 // 1. 🟢 GLOBAL BOTTOM TOAST (Soft Inverse Colors, Chores Gol, Left Aligned)
 window.showAppToast = function(message, type = 'success') {

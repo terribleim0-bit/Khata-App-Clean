@@ -46,8 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 🟢 Generate dynamic activity text with date
+        const activityText = `Customer Added on ${window.getFormattedDate()}`;
+
         db.transaction(function(tx) {
-            tx.executeSql('INSERT INTO customers (id, name, phone, balance) VALUES (?, ?, ?, ?)', [custId, cleanName, phone, 0]);
+            // 🟢 Pass 5 values now: id, name, phone, balance, and last_activity_text
+            tx.executeSql('INSERT INTO customers (id, name, phone, balance, last_activity_text) VALUES (?, ?, ?, ?, ?)', 
+                [custId, cleanName, phone, 0, activityText]);
         }, function(error) {
             window.showAppToast("Save failed!", "error");
             console.log('Insert Error: ' + error.message);
@@ -57,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { window.location.replace('../index.html'); }, 800);
         });
     }
+
 
     // --- Header Search Animation Logic ---
     if(btnOpenSearch && btnCancelSearch) {
