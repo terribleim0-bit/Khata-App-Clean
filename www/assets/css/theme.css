@@ -1011,6 +1011,10 @@ video {
   margin-top: 1.5rem;
 }
 
+.mt-\[2px\] {
+  margin-top: 2px;
+}
+
 .box-border {
   box-sizing: border-box;
 }
@@ -1181,6 +1185,10 @@ video {
   height: 100dvh;
 }
 
+.h-\[14px\] {
+  height: 14px;
+}
+
 .h-\[15px\] {
   height: 15px;
 }
@@ -1299,6 +1307,10 @@ video {
 
 .w-8 {
   width: 2rem;
+}
+
+.w-\[14px\] {
+  width: 14px;
 }
 
 .w-\[15px\] {

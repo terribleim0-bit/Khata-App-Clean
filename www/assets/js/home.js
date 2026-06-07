@@ -209,40 +209,38 @@ function renderCustomers(customers) {
 
         let subTextHTML = '';
         if (cust.last_activity_text) {
-            const activityLower = cust.last_activity_text.toLowerCase();
-            let textColorClass = 'text-secondary'; // Default color (Grey)
-            
-            // Rang (Color) set karan da logic
-            if (activityLower.includes('payment') || activityLower.includes('received')) {
-                textColorClass = 'text-green';
-            } else if (activityLower.includes('credit') || activityLower.includes('given')) {
-                textColorClass = 'text-red';
-            } else if (activityLower.includes('deleted')) {
-                textColorClass = 'text-secondary'; 
-            }
-            
-            // Icon hata ditta gaya hai, sirf bullet point (•) te dynamic color apply kitta hai
-            subTextHTML = `<span class="${textColorClass} text-[13px] tracking-wide truncate">• ${cust.last_activity_text}</span>`;
+            // Sirf grey rang (text-secondary), theeka SVG (Tick), aur wrap hon di azaadi (no truncate)
+            subTextHTML = `
+                <div class="flex items-start gap-1.5 mt-1 text-secondary">
+                    <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-[13px] tracking-wide break-words leading-tight">${cust.last_activity_text}</span>
+                </div>`;
         } else {
-            // Default agar koi purana customer bina activity de hove
-            subTextHTML = `<span class="text-secondary text-[13px] tracking-wide truncate">• Customer Added</span>`;
+            // Default: Profile SVG aur "Customer Added"
+            subTextHTML = `
+                <div class="flex items-start gap-1.5 mt-1 text-secondary">
+                    <svg class="w-[14px] h-[14px] shrink-0 mt-[2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-[13px] tracking-wide break-words leading-tight">Customer Added</span>
+                </div>`;
         }
 
-        // home.js vich itemHTML nu is naal replace kar
+        // itemHTML vich p tag nu hata ke sidha subTextHTML render kitta hai taaki spacing theek rave
         const itemHTML = `
             <a href="pages/ledger.html?id=${cust.id}" class="group flex items-center pl-4 transition-all cursor-pointer active:scale-[0.98] active:opacity-70 block">
                 <div class="w-10 h-10 rounded-full bg-avatar text-white flex items-center justify-center font-semibold text-[17px] shrink-0 uppercase">
                     ${cust.name.charAt(0)}
                 </div>
                 <div class="flex-1 flex flex-col justify-center ml-3">
-                    <div class="py-3 pr-4 flex justify-between items-center">
+                    <div class="py-3 pr-4 flex justify-between items-start">
                         <div class="min-w-0 pr-2">
                             <h3 class="text-[16px] font-normal text-primary truncate">${cust.name}</h3>
-                            <p class="text-[13px] text-secondary mt-0.5 flex items-center">
-                                ${subTextHTML}
-                            </p>
+                            ${subTextHTML}
                         </div>
-                        <div class="text-right shrink-0">
+                        <div class="text-right shrink-0 mt-0.5">
                             <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${Math.abs(bal)}</p>
                             <p class="text-[13px] text-secondary mt-0.5 tracking-wide">${statusText}</p>
                         </div>
@@ -275,6 +273,7 @@ function renderCustomers(customers) {
         }
     }
 }
+
 // ===============================================
 // 🟢 KEYBOARD DETECTION LOGIC (Hide Bottom Nav)
 // ===============================================
