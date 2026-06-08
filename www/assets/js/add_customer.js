@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 🟢 Generate dynamic activity text with date
-        const activityText = `Customer Added on ${window.getFormattedDate()}`;
+        const activityText = `Added on ${window.getFormattedDate()}`;
 
         db.transaction(function(tx) {
             // 🟢 Pass 5 values now: id, name, phone, balance, and last_activity_text
