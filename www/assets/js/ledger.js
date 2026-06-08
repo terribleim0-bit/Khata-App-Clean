@@ -384,13 +384,13 @@ function setupUI(customer, custId) {
 
     renderTransactions(enrichedTxns);
 
-    // ===============================================
-    // 🟢 SEARCH LOGIC (Fixed Header Swap + Clean Hide)
+        // ===============================================
+    // 🟢 SEARCH LOGIC (Smart Date Filter & Auto Focus)
     // ===============================================
     const searchBtn = document.getElementById('search-toggle-btn');
-    const btnCancelSearch = document.getElementById('cancel-search-btn'); // Cancel button di ID
+    const btnCancelSearch = document.getElementById('cancel-search-btn'); 
+    const btnClearSearch = document.getElementById('btn-clear-search');
     
-    // Purane header variables wapas liyande
     const headerNormal = document.getElementById('header-normal');
     const headerSearch = document.getElementById('header-search');
     
@@ -401,23 +401,23 @@ function setupUI(customer, custId) {
 
     window.toggleSearch = function() {
         if (!isSearchOpen) {
-            // 🟢 OPEN SEARCH (Header Swap)
+            // OPEN SEARCH
             if (headerNormal) headerNormal.classList.add('opacity-0', 'pointer-events-none');
             if (headerSearch) headerSearch.classList.remove('opacity-0', 'pointer-events-none');
             
-            // Thalle wali patti te buttons hide (Transparent effect)
             if (mainFooter) mainFooter.style.display = 'none';
             if (bottomControls) bottomControls.style.display = 'none';
             if (ledgerMain) ledgerMain.style.paddingBottom = '0px';
             
-            if (searchInput) searchInput.focus();
             isSearchOpen = true;
+            // Focus naal mobile keyboard apne aap khulega
+            if (searchInput) setTimeout(() => searchInput.focus(), 50);
+            
         } else {
-            // 🔴 CLOSE SEARCH (Header wapas laao)
+            // CLOSE SEARCH
             if (headerSearch) headerSearch.classList.add('opacity-0', 'pointer-events-none');
             if (headerNormal) headerNormal.classList.remove('opacity-0', 'pointer-events-none');
             
-            // Thalle wale elements wapas show karo
             if (mainFooter) mainFooter.style.display = '';
             if (bottomControls) bottomControls.style.display = '';
             if (ledgerMain) ledgerMain.style.paddingBottom = '';
@@ -425,31 +425,57 @@ function setupUI(customer, custId) {
             if (searchInput) {
                 searchInput.value = '';
                 searchInput.blur();
+                if (btnClearSearch) btnClearSearch.classList.add('hidden');
             }
             isSearchOpen = false;
             
-            // List reset karo
             renderTransactions(enrichedTxns); 
         }
     };
 
-    // Button clicks set kitte
     if(searchBtn) searchBtn.addEventListener('click', window.toggleSearch);
     if(btnCancelSearch) btnCancelSearch.addEventListener('click', window.toggleSearch);
 
-    // Search input typing logic
+    // Clear (X) Button Click Logic
+    if (btnClearSearch && searchInput) {
+        btnClearSearch.addEventListener('click', () => {
+            searchInput.value = '';
+            btnClearSearch.classList.add('hidden');
+            searchInput.focus(); // Wapas text box ch ungal rakho
+            renderTransactions(enrichedTxns);
+        });
+    }
+
+    // Input Type Logic & Smart Date Match
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
+            
             if (query === "") {
+                if(btnClearSearch) btnClearSearch.classList.add('hidden');
                 renderTransactions(enrichedTxns);
                 return;
+            } else {
+                if(btnClearSearch) btnClearSearch.classList.remove('hidden');
             }
+
             const filtered = enrichedTxns.filter(t => {
-                return t.actualNote.toLowerCase().includes(query) || 
-                       String(t.amount).includes(query) || 
-                       t.dStr.toLowerCase().includes(query) || 
-                       (t.type && t.type.toLowerCase().includes(query)); 
+                const amtMatch = String(t.amount).includes(query);
+                const noteMatch = t.actualNote.toLowerCase().includes(query);
+                const typeMatch = t.type && t.type.toLowerCase().includes(query);
+                
+                let dateMatch = false;
+                
+                // FALSE MATCH FIX: Je tusi sirf ek/do number (jivein "6") likhe ne, taan oh saal (2026) check nahi karega
+                // Sirf din check karega (08). Par je tusi "8 jun" likhoge taan poora search chalega.
+                if (!isNaN(query) && query.length < 4) {
+                    const dayPart = t.dStr.split(' ')[0]; 
+                    dateMatch = dayPart.includes(query);
+                } else {
+                    dateMatch = t.dStr.toLowerCase().includes(query);
+                }
+
+                return amtMatch || noteMatch || typeMatch || dateMatch; 
             });
             renderTransactions(filtered);
         });
