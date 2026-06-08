@@ -203,7 +203,7 @@ function formatRelativeActivityText(text) {
         result = result.replace(' Deleted on ', ' (Del) • ');
         result = result.replace('Added on ', '');
         result = result.replace('Added On ', '');
-        result = result.replace(/, \d{4}/, ''); // Remove year (e.g., ", 2026")
+        //result = result.replace(/, \d{4}/, ''); // Remove year (e.g., ", 2026")
     }
     
     return result;

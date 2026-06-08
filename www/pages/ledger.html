@@ -43,37 +43,44 @@
 </head>
 <body class="bg-[#f2f2f7] dark:bg-[#000000] text-gray-900 dark:text-gray-100 flex flex-col h-[100dvh] overflow-hidden font-sans transition-colors duration-300">
 
-    <header class="relative bg-[#f2f2f7]/80 dark:bg-[#000000]/80 backdrop-blur-xl border-b border-gray-300/50 dark:border-gray-800 shrink-0 z-40 h-[60px] overflow-hidden transition-colors">
+    <body class="bg-master text-primary flex flex-col h-[100dvh] overflow-hidden transition-colors duration-300 antialiased">
+
+    <header class="relative bg-master/70 backdrop-blur-xl border-b border-line shrink-0 z-50 h-14 overflow-hidden transition-colors">
         
         <div id="header-normal" class="absolute inset-0 flex items-center justify-between px-4 transition-opacity duration-300">
-            <button id="back-btn" class="p-2 -ml-2 text-[#007AFF] dark:text-[#0A84FF] active:opacity-50 transition-opacity z-10 shrink-0">
+            <button id="back-btn" class="p-2 -ml-2 text-brand active:opacity-50 active:scale-[0.98] transition-all z-10 shrink-0">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </button>
             
             <div id="header-profile-link" class="flex items-center flex-1 cursor-pointer active:opacity-60 transition-opacity overflow-hidden ml-1 mr-2">
-                <div id="header-initial" class="w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-800 flex items-center justify-center text-white font-bold mr-2.5 text-sm shadow-sm border border-black/10 shrink-0">?</div>
-                <div class="flex flex-col truncate">
-                    <h1 id="header-name" class="text-[17px] font-semibold leading-tight text-gray-900 dark:text-white truncate">Loading...</h1>
-                    <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium tracking-wide uppercase mt-0.5">View Profile</p>
+                <div id="header-initial" class="w-10 h-10 rounded-full bg-avatar flex items-center justify-center text-white font-semibold mr-3 text-[17px] uppercase shrink-0">?</div>
+                <div class="flex flex-col min-w-0 pr-2">
+                    <h1 id="header-name" class="text-[16px] font-normal leading-tight text-primary truncate">Loading...</h1>
+                    <p class="text-[13px] text-secondary font-medium tracking-wide mt-0.5 truncate">View Profile</p>
                 </div>
             </div>
 
-            <button id="search-toggle-btn" class="p-2 -mr-2 text-[#007AFF] dark:text-[#0A84FF] active:opacity-50 transition-opacity z-10 shrink-0">
+            <button id="search-toggle-btn" class="p-2 -mr-2 text-brand active:opacity-50 transition-opacity z-10 shrink-0">
                 <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </button>
         </div>
 
-        <div id="header-search" class="absolute inset-0 flex items-center px-4 transition-opacity duration-300 opacity-0 pointer-events-none">
-            <div class="flex-1 flex items-center bg-[#E4E4E5] dark:bg-[#1C1C1E] rounded-[10px] px-3 py-1.5 transition-colors">
-                <svg class="w-[20px] h-[20px] text-gray-500 shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                <input type="text" id="search-input" class="w-full bg-transparent outline-none text-[17px] font-normal text-gray-900 dark:text-white placeholder-gray-500 p-0" placeholder="Search by amount, date or note...">
+        <div id="header-search" class="absolute inset-0 flex items-center px-4 transition-opacity duration-300 opacity-0 pointer-events-none z-10">
+            <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 min-w-0">
+                <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
                 
-                <button id="btn-clear-search" class="hidden text-gray-400 dark:text-gray-500 active:opacity-50 ml-2 outline-none">
-                    <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                <input type="text" id="search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 px-2" placeholder="Search">
+                
+                <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 outline-none flex items-center justify-center">
+                    <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             
-            <button id="btn-cancel-search" class="ml-3 text-[#007AFF] dark:text-[#0A84FF] text-[17px] font-normal active:opacity-50 z-10">
+            <button id="btn-cancel-search" class="ml-3 text-brand text-[17px] font-normal active:scale-[0.98] active:opacity-50 shrink-0 transition-all">
                 Cancel
             </button>
         </div>
