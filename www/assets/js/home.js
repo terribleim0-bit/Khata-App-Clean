@@ -164,8 +164,51 @@ function loadCustomersFromDB() {
         });
     });
 }
+// Dynamic Date Filter: Converts exact dates to Today/Yesterday and removes year
+function formatRelativeActivityText(text) {
+    if (!text) return "";
+    
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    // Tuhadi app de exact date format naal match karna (e.g., "8 Jun, 2026")
+    const todayStr = `${today.getDate()} ${months[today.getMonth()]}, ${today.getFullYear()}`;
+    const yesterdayStr = `${yesterday.getDate()} ${months[yesterday.getMonth()]}, ${yesterday.getFullYear()}`;
+    
+    let result = text;
+    
+    if (result.includes(todayStr)) {
+        // Ajj di entry
+        result = result.replace(` Added on ${todayStr}`, ' • Today');
+        result = result.replace(` Edited on ${todayStr}`, ' (Edit) • Today');
+        result = result.replace(` Deleted on ${todayStr}`, ' (Del) • Today');
+        result = result.replace(`Added on ${todayStr}`, 'Today');
+        result = result.replace(`Added On ${todayStr}`, 'Today');
+        result = result.replace(todayStr, 'Today'); // Safety fallback
+    } else if (result.includes(yesterdayStr)) {
+        // Kal di entry
+        result = result.replace(` Added on ${yesterdayStr}`, ' • Yesterday');
+        result = result.replace(` Edited on ${yesterdayStr}`, ' (Edit) • Yesterday');
+        result = result.replace(` Deleted on ${yesterdayStr}`, ' (Del) • Yesterday');
+        result = result.replace(`Added on ${yesterdayStr}`, 'Yesterday');
+        result = result.replace(`Added On ${yesterdayStr}`, 'Yesterday');
+        result = result.replace(yesterdayStr, 'Yesterday'); // Safety fallback
+    } else {
+        // Purani entry (Saal hata deo te format chhota karo)
+        result = result.replace(' Added on ', ' • ');
+        result = result.replace(' Edited on ', ' (Edit) • ');
+        result = result.replace(' Deleted on ', ' (Del) • ');
+        result = result.replace('Added on ', '');
+        result = result.replace('Added On ', '');
+        result = result.replace(/, \d{4}/, ''); // Remove year (e.g., ", 2026")
+    }
+    
+    return result;
+}
 
-// Render Customers & Update Net Balance
 // Render Customers & Update Net Balance
 function renderCustomers(customers) {
     if (!listContainer) return;
@@ -212,26 +255,39 @@ function renderCustomers(customers) {
 
         let subTextHTML = '';
         
-        // 1. Text de andar ₹ hai ya nahi
+        // Pehlan raw text kadd lao
+        let rawText = '';
+        let isPayment = false;
+
         if (cust.last_activity_text && cust.last_activity_text.includes('₹')) {
+            rawText = cust.last_activity_text;
+            isPayment = true;
+        } else {
+            rawText = cust.last_activity_text || `Added On ${cust.created_at || 'Recently'}`;
+            isPayment = false;
+        }
+
+        // Text nu filter karke Today/Yesterday vich badlo
+        const finalActivityText = formatRelativeActivityText(rawText);
+
+        if (isPayment) {
             subTextHTML = `
                 <div class="flex items-center gap-1 text-secondary min-w-0 flex-1 pr-2">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[11.5px] tracking-tight truncate">${cust.last_activity_text}</span>
+                    <span class="text-[11.5px] tracking-tight truncate">${finalActivityText}</span>
                 </div>`;
         } else {
-            // Profile SVG (Customer Added layi)
-            const addedText = cust.last_activity_text || `Added On ${cust.created_at || 'Recently'}`;
             subTextHTML = `
                 <div class="flex items-center gap-1 text-secondary min-w-0 flex-1 pr-2">
-                    <svg class="w-3.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-3.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[11.5px] tracking-tight truncate">${addedText}</span>
+                    <span class="text-[11.5px] tracking-tight truncate">${finalActivityText}</span>
                 </div>`;
         }
+
 
         const itemHTML = `
             <a href="pages/ledger.html?id=${cust.id}" class="group flex items-center pl-4 transition-all cursor-pointer active:scale-[0.98] active:opacity-70 block">
