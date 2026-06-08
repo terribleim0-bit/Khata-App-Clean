@@ -196,7 +196,7 @@ function renderCustomers(customers) {
         const bal = parseFloat(cust.balance) || 0;
         totalNet += bal;
         
-        // 1. Indian Comma Format (e.g., 10,00,000)
+        // Main balance layi comma format
         const formattedBal = Math.abs(bal).toLocaleString('en-IN');
         
         let balClass = 'text-primary';
@@ -211,25 +211,25 @@ function renderCustomers(customers) {
         }
 
         let subTextHTML = '';
-        if (cust.last_activity_text) {
-            // Lami line nu ik line vich lock karan layi 'truncate' aur 'min-w-0'
+        
+        // Nawa Logic: Check karo ki text vich ₹ hai (Yani payment/credit hai)
+        if (cust.last_activity_text && cust.last_activity_text.includes('₹')) {
             subTextHTML = `
                 <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide truncate">${cust.last_activity_text}</span>
+                    <span class="text-[13px] tracking-tight truncate block">${cust.last_activity_text}</span>
                 </div>`;
         } else {
-            // 2. Default text vich "Customer" word kadd ke Profile SVG laya hai
-            // Note: cust.created_at di jagah database wali date field lagao je available hai
-            const dateAdded = cust.created_at ? cust.created_at : 'Recently'; 
+            // Agar ₹ nahi hai, taan oh "Customer Added" hai. Profile SVG lawange.
+            const addedText = cust.last_activity_text || `Added On ${cust.created_at || 'Recently'}`;
             subTextHTML = `
                 <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide truncate">Added On ${dateAdded}</span>
+                    <span class="text-[13px] tracking-tight truncate block">${addedText}</span>
                 </div>`;
         }
 
@@ -238,15 +238,18 @@ function renderCustomers(customers) {
                 <div class="w-10 h-10 rounded-full bg-avatar text-white flex items-center justify-center font-semibold text-[17px] shrink-0 uppercase">
                     ${cust.name.charAt(0)}
                 </div>
-                <div class="flex-1 flex flex-col justify-center ml-3">
+                
+                <div class="flex-1 flex flex-col justify-center ml-3 min-w-0">
                     <div class="py-3 pr-4 flex justify-between items-center">
-                        <div class="min-w-0 pr-2">
+                        
+                        <div class="flex-1 min-w-0 pr-2">
                             <h3 class="text-[16px] font-normal text-primary truncate">${cust.name}</h3>
                             ${subTextHTML}
                         </div>
-                        <div class="text-right shrink-0">
-                            <p class="text-[16px] font-semibold ${balClass} tracking-wide">₹${formattedBal}</p>
-                            <p class="text-[13px] text-secondary mt-0.5 tracking-wide">${statusText}</p>
+                        
+                        <div class="text-right shrink-0 ml-2">
+                            <p class="text-[16px] font-semibold ${balClass} tracking-tight">₹${formattedBal}</p>
+                            <p class="text-[13px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
                         </div>
                     </div>
                     <div class="h-[1px] bg-line mr-4 group-last:hidden"></div>
@@ -265,7 +268,7 @@ function renderCustomers(customers) {
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide">${customers.length} Accounts</span>
+                    <span class="text-[13px] tracking-tight">${customers.length} Accounts</span>
                 </div>`;
         }
         if (totalBalanceEl && totalStatusEl) {

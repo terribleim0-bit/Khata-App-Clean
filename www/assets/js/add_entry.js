@@ -466,13 +466,15 @@ document.getElementById('confirm-btn').addEventListener('click', function() {
     newBalance = isGiven ? newBalance - finalAmount : newBalance + finalAmount;
 
     // 🟢 Generate formatted text without HTML
-    // FIX: window. prefix lagaya taaki global function theek tarah access hove
     const dateStr = window.getFormattedDate(finalDateTimestamp);
+    
+    // Nawa Code: Rakm nu comma format vich convert kitta
+    const formattedAmount = finalAmount.toLocaleString('en-IN'); 
 
-    // Format: "₹10 Credit Added on 2 May, 2026" ya "₹12 Payment Added on 2 May, 2026"
+    // Format: "₹10,00,000 Credit Added on 2 May, 2026"
     const activityText = isGiven ? 
-        `₹${finalAmount} Credit Added on ${dateStr}` : 
-        `₹${finalAmount} Payment Added on ${dateStr}`;
+        `₹${formattedAmount} Credit Added on ${dateStr}` : 
+        `₹${formattedAmount} Payment Added on ${dateStr}`;
 
     db.transaction(function(tx) {
         tx.executeSql('INSERT INTO transactions (id, customer_id, amount, type, note, date, bill_paths) VALUES (?, ?, ?, ?, ?, ?, ?)', 
@@ -480,6 +482,7 @@ document.getElementById('confirm-btn').addEventListener('click', function() {
         
         tx.executeSql('UPDATE customers SET balance = ?, last_activity_text = ? WHERE id = ?', 
             [newBalance, activityText, customer.id]);
+
             
     
 
