@@ -219,17 +219,17 @@ function renderCustomers(customers) {
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide truncate">${cust.last_activity_text}</span>
+                    <span class="text-[11.5px] tracking-tight truncate">${cust.last_activity_text}</span>
                 </div>`;
         } else {
             // Profile SVG (Customer Added layi)
             const addedText = cust.last_activity_text || `Added On ${cust.created_at || 'Recently'}`;
             subTextHTML = `
                 <div class="flex items-center gap-1 text-secondary min-w-0 flex-1 pr-2">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-3.5 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[13px] tracking-wide truncate">${addedText}</span>
+                    <span class="text-[11.5px] tracking-tight truncate">${addedText}</span>
                 </div>`;
         }
 
@@ -243,13 +243,13 @@ function renderCustomers(customers) {
                     <div class="py-3 pr-4 flex flex-col justify-center gap-1">
                         
                         <div class="flex justify-between items-center">
-                            <h3 class="text-[16px] font-normal text-primary truncate pr-2">${cust.name}</h3>
+                            <h3 class="text-[15px] font-normal text-primary truncate pr-2">${cust.name}</h3>
                             <p class="text-[16px] font-semibold ${balClass} tracking-wide shrink-0">₹${formattedBal}</p>
                         </div>
                         
                         <div class="flex justify-between items-center">
                             ${subTextHTML}
-                            <p class="text-[13px] text-secondary tracking-wide shrink-0 text-right">${statusText}</p>
+                            <p class="text-[11.5px] text-secondary tracking-tight shrink-0 text-right">${statusText}</p>
                         </div>
                         
                     </div>
@@ -267,7 +267,7 @@ function renderCustomers(customers) {
             // 3. Net Balance de thalle Account count de naal Profile SVG
             accountCountEl.innerHTML = `
                 <div class="flex items-center gap-1 text-secondary mt-0.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-3.5 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     <span class="text-[13px] tracking-tight">${customers.length} Accounts</span>
