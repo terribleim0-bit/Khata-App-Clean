@@ -212,24 +212,24 @@ function renderCustomers(customers) {
 
         let subTextHTML = '';
         
-        // Nawa Logic: Check karo ki text vich ₹ hai (Yani payment/credit hai)
+        // 1. Text de andar ₹ hai ya nahi
         if (cust.last_activity_text && cust.last_activity_text.includes('₹')) {
             subTextHTML = `
-                <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
+                <div class="flex items-center gap-1 text-secondary min-w-0 flex-1 pr-2">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span class="text-[11px] tracking-tight truncate block">${cust.last_activity_text}</span>
+                    <span class="text-[13px] tracking-wide truncate">${cust.last_activity_text}</span>
                 </div>`;
         } else {
-            // Agar ₹ nahi hai, taan oh "Customer Added" hai. Profile SVG lawange.
+            // Profile SVG (Customer Added layi)
             const addedText = cust.last_activity_text || `Added On ${cust.created_at || 'Recently'}`;
             subTextHTML = `
-                <div class="flex items-center gap-1 mt-1 text-secondary min-w-0">
-                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <div class="flex items-center gap-1 text-secondary min-w-0 flex-1 pr-2">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span class="text-[11px] tracking-tight truncate block">${addedText}</span>
+                    <span class="text-[13px] tracking-wide truncate">${addedText}</span>
                 </div>`;
         }
 
@@ -240,22 +240,24 @@ function renderCustomers(customers) {
                 </div>
                 
                 <div class="flex-1 flex flex-col justify-center ml-3 min-w-0">
-                    <div class="py-3 pr-4 flex justify-between items-center">
+                    <div class="py-3 pr-4 flex flex-col justify-center gap-1">
                         
-                        <div class="flex-1 min-w-0 pr-2">
-                            <h3 class="text-[16px] font-normal text-primary truncate">${cust.name}</h3>
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-[16px] font-normal text-primary truncate pr-2">${cust.name}</h3>
+                            <p class="text-[16px] font-semibold ${balClass} tracking-wide shrink-0">₹${formattedBal}</p>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
                             ${subTextHTML}
+                            <p class="text-[13px] text-secondary tracking-wide shrink-0 text-right">${statusText}</p>
                         </div>
                         
-                        <div class="text-right shrink-0 ml-2">
-                            <p class="text-[16px] font-semibold ${balClass} tracking-tight">₹${formattedBal}</p>
-                            <p class="text-[11px] text-secondary mt-0.5 tracking-tight">${statusText}</p>
-                        </div>
                     </div>
                     <div class="h-[1px] bg-line mr-4 group-last:hidden"></div>
                 </div>
             </a>
         `;
+
 
         listContainer.innerHTML += itemHTML;
     });
