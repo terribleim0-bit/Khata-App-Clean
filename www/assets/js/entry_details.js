@@ -33,46 +33,44 @@ document.addEventListener('deviceready', () => {
 
     document.getElementById('cam-capture-btn').onclick = () => captureBillImage(1);
     document.getElementById('cam-gallery-btn').onclick = () => {
-        document.getElementById('native-gallery-input').click();
-    };
-
-    document.getElementById('native-gallery-input').addEventListener('change', function(e) {
-        const files = Array.from(e.target.files);
-        if (!files || files.length === 0) return;
+        history.back(); // Modal band karan layi
 
         const billPaths = foundTxn.bill_paths || [];
         const availableSlots = MAX_BILLS - billPaths.length;
 
-        if (files.length > availableSlots) {
-            history.back(); // Modal band karan layi
-            if(window.showAppToast) showAppToast(`You can only add ${availableSlots} more photos.`);
-            this.value = ''; 
-            return; 
+        if (availableSlots <= 0) {
+            if(window.showAppToast) showAppToast("Limit reached. Cannot add more photos.");
+            return;
         }
 
-        history.back(); // Modal band karan layi
+        if (!window.MediaPicker) {
+            alert("Error: MediaPicker plugin is missing! App rebuild karo.");
+            return;
+        }
 
-        files.forEach((file, i) => {
-            if (window.cordova && cordova.file) {
-                let uniqueFileName = "khata_bill_dt_gal_" + Date.now() + "_" + i + ".jpg";
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
-                    dirEntry.getFile(uniqueFileName, { create: true, exclusive: false }, function(fileEntry) {
-                        fileEntry.createWriter(function(fileWriter) {
-                            fileWriter.onwriteend = function() {
-                                attachBillToData(fileEntry.name);
-                            };
-                            fileWriter.onerror = function() { console.error("Gallery save failed"); };
-                            fileWriter.write(file); 
-                        });
+        // Native Picker with STRICT LIMIT
+        MediaPicker.getPictures({
+            maxImages: availableSlots, // 🟢 Gallery limit aithe lag rhi hai
+            mediaType: 'image',
+            quality: 60
+        }, function(result) {
+            if (!result || result.length === 0) return;
+            
+            result.forEach((imagePath, i) => {
+                let finalURI = imagePath.indexOf('file://') === 0 ? imagePath : 'file://' + imagePath;
+                window.resolveLocalFileSystemURL(finalURI, function(fileEntry) {
+                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
+                        let uniqueFileName = "khata_bill_dt_gal_" + Date.now() + "_" + i + ".jpg";
+                        fileEntry.copyTo(dirEntry, uniqueFileName, function(newFileEntry) {
+                            attachBillToData(newFileEntry.name);
+                        }, function(err) { console.error("Copy failed: ", err); });
                     });
                 });
-            } else {
-                let fakeName = "web_mock_gal_" + Date.now() + "_" + i + ".jpg";
-                attachBillToData(fakeName);
-            }
+            });
+        }, function(error) {
+            console.error("Gallery Error: " + error);
         });
-        this.value = ''; 
-    });
+    };
 
     document.getElementById('preview-delete-btn').onclick = () => deleteActiveImage();
     document.getElementById('sms-share-btn').onclick = () => triggerSMSIntent();
