@@ -48,16 +48,24 @@ document.addEventListener('deviceready', () => {
             return;
         }
 
-        // Native Picker with STRICT LIMIT
-        MediaPicker.getPictures({
-            maxImages: availableSlots, // 🟢 Gallery limit aithe lag rhi hai
+        // 🟢 Nawa Fix: getMedia function use kitta hai
+        MediaPicker.getMedia({
+            maxSelectCount: availableSlots, // Is plugin vich limit da parameter
+            maxImages: availableSlots,      // Fallback
+            imageCount: availableSlots,     // Fallback
             mediaType: 'image',
-            quality: 60
+            selectMode: 1                   // 1 = Multiple selection mode
         }, function(result) {
             if (!result || result.length === 0) return;
             
-            result.forEach((imagePath, i) => {
-                let finalURI = imagePath.indexOf('file://') === 0 ? imagePath : 'file://' + imagePath;
+            result.forEach((imageObj, i) => {
+                // 🟢 MediaPicker plugin aksar string di jagah object return karda hai
+                let pathStr = typeof imageObj === 'string' ? imageObj : (imageObj.path || imageObj.uri || imageObj.localPath);
+                
+                if (!pathStr) return; // Agar path nahi milya taan skip karo
+
+                let finalURI = pathStr.indexOf('file://') === 0 ? pathStr : 'file://' + pathStr;
+                
                 window.resolveLocalFileSystemURL(finalURI, function(fileEntry) {
                     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
                         let uniqueFileName = "khata_bill_dt_gal_" + Date.now() + "_" + i + ".jpg";
@@ -71,6 +79,8 @@ document.addEventListener('deviceready', () => {
             console.error("Gallery Error: " + error);
         });
     };
+
+    
 
     document.getElementById('preview-delete-btn').onclick = () => deleteActiveImage();
     document.getElementById('sms-share-btn').onclick = () => triggerSMSIntent();
