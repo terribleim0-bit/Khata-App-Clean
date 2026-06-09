@@ -249,7 +249,7 @@ function renderCustomers(customers) {
             balClass = 'text-status-green';
             statusText = 'Advance';
         } else if (bal < 0) {
-            balClass = 'text-status-red;
+            balClass = 'text-status-red';
             statusText = 'Due';
         }
 
