@@ -165,49 +165,60 @@ function loadCustomersFromDB() {
     });
 }
 // Dynamic Date Filter: Converts exact dates to Today/Yesterday and removes year
+// 🟢 Dynamic Date Filter: Production-Ready Logic
 function formatRelativeActivityText(text) {
     if (!text) return "";
     
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const now = new Date();
+    const currentYear = now.getFullYear();
     
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    // Zero-out time to strict midnight for accurate day comparison
+    const today = new Date(currentYear, now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
     
-    // Tuhadi app de exact date format naal match karna (e.g., "8 Jun, 2026")
-    const todayStr = `${today.getDate()} ${months[today.getMonth()]}, ${today.getFullYear()}`;
-    const yesterdayStr = `${yesterday.getDate()} ${months[yesterday.getMonth()]}, ${yesterday.getFullYear()}`;
+    // Find exact date pattern like "10 Jun, 2026" anywhere in the string
+    const dateRegex = /(\d{1,2})\s([A-Z][a-z]{2}),\s(\d{4})/;
+    const match = text.match(dateRegex);
     
-    let result = text;
-    
-    if (result.includes(todayStr)) {
-        // Ajj di entry
-        result = result.replace(` Added on ${todayStr}`, ' • Today');
-        result = result.replace(` Edited on ${todayStr}`, ' (Edit) • Today');
-        result = result.replace(` Deleted on ${todayStr}`, ' (Del) • Today');
-        result = result.replace(`Added on ${todayStr}`, 'Today');
-        result = result.replace(`Added On ${todayStr}`, 'Today');
-        result = result.replace(todayStr, 'Today'); // Safety fallback
-    } else if (result.includes(yesterdayStr)) {
-        // Kal di entry
-        result = result.replace(` Added on ${yesterdayStr}`, ' • Yesterday');
-        result = result.replace(` Edited on ${yesterdayStr}`, ' (Edit) • Yesterday');
-        result = result.replace(` Deleted on ${yesterdayStr}`, ' (Del) • Yesterday');
-        result = result.replace(`Added on ${yesterdayStr}`, 'Yesterday');
-        result = result.replace(`Added On ${yesterdayStr}`, 'Yesterday');
-        result = result.replace(yesterdayStr, 'Yesterday'); // Safety fallback
-    } else {
-        // Purani entry (Saal hata deo te format chhota karo)
+    if (match) {
+        const day = parseInt(match[1], 10);
+        const monthStr = match[2];
+        const year = parseInt(match[3], 10);
+        
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthIndex = months.indexOf(monthStr);
+        
+        const entryDate = new Date(year, monthIndex, day);
+        let formattedDate = "";
+        
+        // 🟢 Core Logic: Today, Yesterday, This Year, Older Years
+        if (entryDate.getTime() === today.getTime()) {
+            formattedDate = "Today";
+        } else if (entryDate.getTime() === yesterday.getTime()) {
+            formattedDate = "Yesterday";
+        } else if (year === currentYear) {
+            formattedDate = `${day} ${monthStr}`; // Hide year
+        } else {
+            formattedDate = `${day} ${monthStr}, ${year}`; // Show year
+        }
+        
+        // 🟢 String Replace: Old date nu nawi smart date naal replace karo
+        let result = text.replace(match[0], formattedDate);
+        
+        // 🟢 Clean Up Prefixes: Tuhadiyan exact 5 lines bina regex de
         result = result.replace(' Added on ', ' • ');
         result = result.replace(' Edited on ', ' (Edit) • ');
         result = result.replace(' Deleted on ', ' (Del) • ');
         result = result.replace('Added on ', '');
         result = result.replace('Added On ', '');
-        //result = result.replace(/, \d{4}/, ''); // Remove year (e.g., ", 2026")
+        
+        return result;
     }
     
-    return result;
+    return text; // Fallback
 }
+
 
 // Render Customers & Update Net Balance
 function renderCustomers(customers) {
