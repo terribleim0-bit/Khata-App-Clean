@@ -59,7 +59,8 @@ jobs:
         cordova plugin add cordova-plugin-file-opener2
         cordova plugin add cordova-plugin-camera
         cordova plugin add cordova-plugin-zip
-        cordova plugin add cordova-plugin-mediapicker
+        cordova plugin add cordova-plugin-image-picker
+
 
         
         # 🟢 THE MAGIC FIX 3: Safely Decode Keystore
