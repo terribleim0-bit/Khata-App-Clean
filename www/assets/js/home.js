@@ -246,10 +246,10 @@ function renderCustomers(customers) {
         let statusText = 'Settled';
         
         if (bal > 0) {
-            balClass = 'text-green';
+            balClass = 'text-status-green';
             statusText = 'Advance';
         } else if (bal < 0) {
-            balClass = 'text-red';
+            balClass = 'text-status-red;
             statusText = 'Due';
         }
 
