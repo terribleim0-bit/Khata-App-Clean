@@ -336,10 +336,10 @@ function renderCustomers(customers) {
             
             if (totalNet > 0) {
                 totalStatusEl.textContent = 'You Give';
-                totalBalanceEl.className = 'text-[17px] font-semibold text-green';
+                totalBalanceEl.className = 'text-[17px] font-semibold text-status-green';
             } else if (totalNet < 0) {
                 totalStatusEl.textContent = 'You Get';
-                totalBalanceEl.className = 'text-[17px] font-semibold text-red';
+                totalBalanceEl.className = 'text-[17px] font-semibold text-status-red';
             } else {
                 totalStatusEl.textContent = 'Settled';
                 totalBalanceEl.className = 'text-[17px] font-semibold text-primary';
