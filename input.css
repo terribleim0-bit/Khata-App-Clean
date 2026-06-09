@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 /* =========================================
    MASTER COLOR THEME (Apple iOS Style)
    ========================================= */
@@ -11,6 +12,7 @@
     --bg-card: #FFFFFF;
     --text-primary: #000000;
     --text-secondary: #8E8E93;
+    --text-muted: #9CA3AF;
     
     /* Apple True Light Blue */
     --brand-blue: #007AFF; 
@@ -18,9 +20,14 @@
     --status-green: #34C759;
     --status-red: #FF3B30;
     --border-line: #C6C6C8;
+    --border-input: #D1D5DB;
    
     --bg-avatar: #8E8E93; /* Apple Light Mode System Gray */
-
+    
+    /* Navay Components De Rang */
+    --bg-fab: rgba(242, 242, 247, 0.95);
+    --bg-fab-active: #E5E7EB;
+    --bg-strip-header: rgba(0, 122, 255, 0.05);
 }
 
 /* 🌙 DARK MODE (Raat) - JS add karega '.dark' class */
@@ -29,6 +36,7 @@
     --bg-card: #1C1C1E;
     --text-primary: #FFFFFF;
     --text-secondary: #98989D;
+    --text-muted: #9CA3AF;
     
     /* Apple True Dark/Neon Blue */
     --brand-blue: #0A84FF; 
@@ -36,7 +44,12 @@
     --status-green: #30D158;
     --status-red: #FF453A;
     --border-line: #38383A;
+    --border-input: #374151;
    
     --bg-avatar: #636366; /* Apple Dark Mode System Gray */
-
+    
+    /* Navay Components De Rang */
+    --bg-fab: rgba(44, 44, 46, 0.95);
+    --bg-fab-active: #4B5563;
+    --bg-strip-header: rgba(10, 132, 255, 0.10);
 }
