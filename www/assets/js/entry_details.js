@@ -33,54 +33,46 @@ document.addEventListener('deviceready', () => {
 
     document.getElementById('cam-capture-btn').onclick = () => captureBillImage(1);
     document.getElementById('cam-gallery-btn').onclick = () => {
-        history.back(); // Modal band karan layi
+        document.getElementById('native-gallery-input').click();
+    };
+
+    document.getElementById('native-gallery-input').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (!files || files.length === 0) return;
 
         const billPaths = foundTxn.bill_paths || [];
         const availableSlots = MAX_BILLS - billPaths.length;
 
-        if (availableSlots <= 0) {
-            if(window.showAppToast) showAppToast("Limit reached. Cannot add more photos.");
-            return;
+        if (files.length > availableSlots) {
+            history.back(); // Modal band karan layi
+            if(window.showAppToast) showAppToast(`You can only add ${availableSlots} more photos.`);
+            this.value = ''; 
+            return; 
         }
 
-        if (!window.MediaPicker) {
-            alert("Error: MediaPicker plugin is missing! App rebuild karo.");
-            return;
-        }
+        history.back(); // Modal band karan layi
 
-        // 🟢 Nawa Fix: getMedia function use kitta hai
-        MediaPicker.getMedia({
-            maxSelectCount: availableSlots, // Is plugin vich limit da parameter
-            maxImages: availableSlots,      // Fallback
-            imageCount: availableSlots,     // Fallback
-            mediaType: 'image',
-            selectMode: 1                   // 1 = Multiple selection mode
-        }, function(result) {
-            if (!result || result.length === 0) return;
-            
-            result.forEach((imageObj, i) => {
-                // 🟢 MediaPicker plugin aksar string di jagah object return karda hai
-                let pathStr = typeof imageObj === 'string' ? imageObj : (imageObj.path || imageObj.uri || imageObj.localPath);
-                
-                if (!pathStr) return; // Agar path nahi milya taan skip karo
-
-                let finalURI = pathStr.indexOf('file://') === 0 ? pathStr : 'file://' + pathStr;
-                
-                window.resolveLocalFileSystemURL(finalURI, function(fileEntry) {
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
-                        let uniqueFileName = "khata_bill_dt_gal_" + Date.now() + "_" + i + ".jpg";
-                        fileEntry.copyTo(dirEntry, uniqueFileName, function(newFileEntry) {
-                            attachBillToData(newFileEntry.name);
-                        }, function(err) { console.error("Copy failed: ", err); });
+        files.forEach((file, i) => {
+            if (window.cordova && cordova.file) {
+                let uniqueFileName = "khata_bill_dt_gal_" + Date.now() + "_" + i + ".jpg";
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
+                    dirEntry.getFile(uniqueFileName, { create: true, exclusive: false }, function(fileEntry) {
+                        fileEntry.createWriter(function(fileWriter) {
+                            fileWriter.onwriteend = function() {
+                                attachBillToData(fileEntry.name);
+                            };
+                            fileWriter.onerror = function() { console.error("Gallery save failed"); };
+                            fileWriter.write(file); 
+                        });
                     });
                 });
-            });
-        }, function(error) {
-            console.error("Gallery Error: " + error);
+            } else {
+                let fakeName = "web_mock_gal_" + Date.now() + "_" + i + ".jpg";
+                attachBillToData(fakeName);
+            }
         });
-    };
-
-    
+        this.value = ''; 
+    });
 
     document.getElementById('preview-delete-btn').onclick = () => deleteActiveImage();
     document.getElementById('sms-share-btn').onclick = () => triggerSMSIntent();
