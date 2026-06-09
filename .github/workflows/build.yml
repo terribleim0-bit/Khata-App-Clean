@@ -59,6 +59,8 @@ jobs:
         cordova plugin add cordova-plugin-file-opener2
         cordova plugin add cordova-plugin-camera
         cordova plugin add cordova-plugin-zip
+        cordova plugin add cordova-plugin-mediapicker
+
         
         # 🟢 THE MAGIC FIX 3: Safely Decode Keystore
         echo "$KEYSTORE_BASE64" | tr -d ' \n\r' | base64 --decode > khata.keystore
