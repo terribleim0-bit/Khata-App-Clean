@@ -14,6 +14,8 @@
     <title>Ledger - Khata App</title>
     
     <script src="../cordova.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
         tailwind.config = { 
@@ -102,16 +104,16 @@
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <input type="text" id="search-input" class="block w-full pl-9 pr-3 py-2 border border-input rounded-xl leading-5 bg-card text-primary placeholder-muted focus:outline-none focus:ring-1 focus:ring-brand sm:text-[15px] transition-colors shadow-sm" placeholder="Search by amount, date or note...">
+            <input type="text" id="search-input-2" class="block w-full pl-9 pr-3 py-2 border border-input rounded-xl leading-5 bg-card text-primary placeholder-muted focus:outline-none focus:ring-1 focus:ring-brand sm:text-[15px] transition-colors shadow-sm" placeholder="Search by amount, date or note...">
         </div>
     </div>
 
     <main id="ledger-main" class="flex-1 overflow-hidden relative flex flex-col">
         <div id="transaction-container" class="px-4 py-4 flex-1 overflow-y-auto flex flex-col-reverse relative">
-            <div id="bottom-controls-container" class="w-full pb-[70px] pt-2 z-30 transition-all duration-300 shrink-0">
+            <div id="bottom-controls-container" class="w-full pb-[60px] pt-2 z-30 transition-all duration-300 shrink-0">
                 <div class="bg-card rounded-[14px] shadow-sm border border-line flex flex-col overflow-hidden mx-1">
                     
-                    <div class="flex justify-between items-center px-4 py-1.5 bg-strip-header border-b border-line">
+                    <div class="flex justify-between items-center px-4 py-1 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50 border-b border-line">
                         <div class="flex space-x-3 items-center">
                             <a id="strip-statement" href="#" class="bg-avatar text-white w-[30px] h-[30px] rounded-full flex items-center justify-center active:scale-90 transition-transform">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -130,7 +132,7 @@
                         </button>
                     </div>
 
-                    <a id="strip-balance-btn" href="#" class="flex justify-between items-center px-4 py-2 bg-transparent active:bg-master transition-colors">
+                    <a id="strip-balance-btn" href="#" class="flex justify-between items-center px-4 py-1.5 bg-transparent active:bg-master transition-colors">
                         <span id="strip-balance-label" class="text-[14px] font-medium text-secondary capitalize">Net Balance</span>
                         <div class="flex items-center gap-1.5 text-right">
                             <span id="strip-balance-value" class="text-[17px] font-bold tracking-tight text-primary">₹0</span>
@@ -144,7 +146,7 @@
         </div>
     </main>
 
-    <button id="fab-scroll-bottom" class="fixed right-4 bottom-[190px] w-[42px] h-[42px] bg-fab backdrop-blur-md border border-input rounded-full flex items-center justify-center shadow-lg text-brand z-30 transition-all duration-300 opacity-0 scale-90 pointer-events-none active:bg-fab-active">
+    <button id="fab-scroll-bottom" class="fixed right-4 bottom-[170px] w-[42px] h-[42px] bg-fab backdrop-blur-md border border-input rounded-full flex items-center justify-center shadow-lg text-brand z-30 transition-all duration-300 opacity-0 scale-90 pointer-events-none active:bg-fab-active">
         <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
         </svg>
@@ -152,13 +154,13 @@
 
     <footer id="main-footer" class="fixed bottom-0 w-full pb-4 pt-4 px-4 z-40 bg-transparent pointer-events-none transition-all duration-300">
         <div class="flex space-x-3 w-full max-w-md mx-auto pointer-events-auto">
-            <a id="receive-btn" href="#" class="flex-1 bg-status-green border-none shadow-sm py-3.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
-                <svg class="w-5 h-5 text-white mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-                <span class="text-[15px] font-bold tracking-wide text-white">Received</span>
+            <a id="receive-btn" href="#" class="flex-1 bg-card border border-status-green/30 shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-status-green mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                <span class="text-[15px] font-bold tracking-wide text-status-green">Received</span>
             </a>
-            <a id="give-btn" href="#" class="flex-1 bg-status-red border-none shadow-sm py-3.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
-                <svg class="w-5 h-5 text-white mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-                <span class="text-[15px] font-bold tracking-wide text-white">Given</span>
+            <a id="give-btn" href="#" class="flex-1 bg-card border border-status-red/30 shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-status-red mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                <span class="text-[15px] font-bold tracking-wide text-status-red">Given</span>
             </a>
         </div>
     </footer>
