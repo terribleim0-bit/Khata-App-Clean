@@ -110,8 +110,11 @@
 
     <main id="ledger-main" class="flex-1 overflow-hidden relative flex flex-col">
         <div id="transaction-container" class="px-4 py-4 flex-1 overflow-y-auto flex flex-col-reverse relative">
-            <div id="bottom-controls-container" class="w-full pb-[60px] pt-2 z-30 transition-all duration-300 shrink-0">
-                <div class="bg-card rounded-[14px] shadow-sm border border-line flex flex-col overflow-hidden mx-1">
+            <!-- Expanded to full width using negative margins -->
+            <div id="bottom-controls-container" class="w-[calc(100%+2rem)] -mx-4 pb-[70px] pt-2 z-30 transition-all duration-300 shrink-0">
+                <!-- Removed mx-1 and changed to rounded-t only -->
+                <div class="bg-card rounded-t-[14px] border-t border-b border-line flex flex-col overflow-hidden w-full">
+
                     
                     <div class="flex justify-between items-center px-4 py-1 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50 border-b border-line">
                         <div class="flex space-x-3 items-center">
@@ -152,13 +155,15 @@
         </svg>
     </button>
 
-    <footer id="main-footer" class="fixed bottom-0 w-full pb-4 pt-4 px-4 z-40 bg-transparent pointer-events-none transition-all duration-300">
-        <div class="flex space-x-3 w-full max-w-md mx-auto pointer-events-auto">
-            <a id="receive-btn" href="#" class="flex-1 bg-card border border-status-green/30 shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
+    <!-- Changed bg-transparent to bg-card and added border-t -->
+    <footer id="main-footer" class="fixed bottom-0 w-full pb-4 pt-4 px-4 z-40 bg-card border-t border-line transition-all duration-300">
+        <div class="flex space-x-3 w-full max-w-md mx-auto">
+
+            <a id="receive-btn" href="#" class="flex-1 bg-card shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
                 <svg class="w-5 h-5 text-status-green mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
                 <span class="text-[15px] font-bold tracking-wide text-status-green">Received</span>
             </a>
-            <a id="give-btn" href="#" class="flex-1 bg-card border border-status-red/30 shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
+            <a id="give-btn" href="#" class="flex-1 bg-card shadow-sm py-2.5 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
                 <svg class="w-5 h-5 text-status-red mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
                 <span class="text-[15px] font-bold tracking-wide text-status-red">Given</span>
             </a>
