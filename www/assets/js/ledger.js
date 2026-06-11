@@ -537,106 +537,77 @@ function setupUI(customer, custId) {
     setText('strip-balance-label', `Balance ${total < 0 ? 'Due' : (total > 0 ? 'Advance' : 'Settled')}`);
 
 }    
+    // ===============================================
+    // 🟢 WHATSAPP & BOTTOM STRIP (Text Trigger)
+    // ===============================================
     
+    // Handle WhatsApp Clicks
+    const waClickHandler = (e) => {
+        e.preventDefault();
+        
+        const phoneStr = customer.phone;
+        if (!phoneStr || phoneStr.trim() === "") {
+            if(window.showAppToast) window.showAppToast("Phone number missing for this customer.");
+            return;
+        }
+
+        sendWhatsAppReminder(customer.name, total, phoneStr);
+    };
+
+    const stripWaBtn = document.getElementById('strip-wa');
+    const modalWaBtn = document.getElementById('modal-wa');
+    
+    if (stripWaBtn) {
+        stripWaBtn.onclick = waClickHandler;
+        stripWaBtn.removeAttribute('target');
+        stripWaBtn.removeAttribute('href');
+    }
+    if (modalWaBtn) {
+        modalWaBtn.onclick = waClickHandler;
+        modalWaBtn.removeAttribute('target');
+        modalWaBtn.removeAttribute('href');
+    }
+
+    // Is ton thalle balance strip wala code as-is rahega
+    setText('strip-balance-value', `₹${Math.abs(total)}`);
+    
+
 // ===============================================
-// 🟢 WHATSAPP IMAGE & CANVAS GENERATOR (Direct to Contact)
+// 🟢 WHATSAPP TEXT REMINDER (Direct to Contact)
 // ===============================================
-async function sendWhatsAppReminder(customerName, amount, customerPhone) {
+function sendWhatsAppReminder(customerName, amount, customerPhone) {
     if (!window.plugins || !window.plugins.socialsharing) {
-        if(window.showAppToast) window.showAppToast("Share plugin not installed. Please build APK again.");
+        if(window.showAppToast) window.showAppToast("Share plugin not installed.");
         return;
     }
 
-    // Phone Number Formatting (Crucial for WhatsApp API)
-    // Remove any spaces, dashes, or + signs
+    // Phone Number Formatting
     let formattedPhone = customerPhone.replace(/\D/g, ''); 
-    // If it's a standard 10-digit Indian number, add 91 prefix automatically
     if (formattedPhone.length === 10) {
         formattedPhone = '91' + formattedPhone; 
     }
 
-    // 1. Dynamic Text Setup
-    let headingText = "";
-    let amountColor = "";
-    let waCaption = `Hello ${customerName},\n`;
+    let waText = "";
+    const separator = "───────────────────";
 
+    // Text Formatting using Unicode Lines and Bullets
     if (amount < 0) {
-        headingText = "Payment Due Reminder!";
-        amountColor = "#ef4444"; // Status Red
-        waCaption += `Your balance of ₹${Math.abs(amount)} is Due. Please pay at the earliest.\n\nSent by: Khata App`;
+        waText = `*Khata App Reminder*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Payment Due\n• Balance: *₹${Math.abs(amount)}*\n${separator}\n▪ Please clear your dues at the earliest.\n▪ Sent via Khata App`;
     } else if (amount > 0) {
-        headingText = "Advance Balance Update!";
-        amountColor = "#22c55e"; // Status Green
-        waCaption += `You have an advance balance of ₹${Math.abs(amount)} with us.\n\nSent by: Khata App`;
+        waText = `*Khata App Update*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Advance Balance\n• Balance: *₹${Math.abs(amount)}*\n${separator}\n▪ You have an advance balance with us.\n▪ Sent via Khata App`;
     } else {
-        headingText = "Account Fully Settled!";
-        amountColor = "#4b5563"; // Dark Gray
-        waCaption += `Your account balance is completely settled.\n\nSent by: Khata App`;
+        waText = `*Khata App Update*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Settled\n• Balance: *₹0*\n${separator}\n▪ Your account is completely settled.\n▪ Sent via Khata App`;
     }
 
-    // 2. Canvas Setup (1080x1080 Square)
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1080;
-    const ctx = canvas.getContext('2d');
-
-    // Background (Apple Blue)
-    ctx.fillStyle = "#007AFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Center White Card Dimensions
-    const cardWidth = 880;
-    const cardHeight = 420;
-    const cardX = (1080 - cardWidth) / 2;
-    const cardY = (1080 - cardHeight) / 2;
-    const radius = 40;
-
-    // Draw White Card with Shadow
-    ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-    ctx.shadowBlur = 40;
-    ctx.shadowOffsetY = 20;
-    ctx.fillStyle = "#FFFFFF";
-    
-    // Fallback safe rounded rectangle for older Android WebViews
-    ctx.beginPath();
-    ctx.moveTo(cardX + radius, cardY);
-    ctx.arcTo(cardX + cardWidth, cardY, cardX + cardWidth, cardY + cardHeight, radius);
-    ctx.arcTo(cardX + cardWidth, cardY + cardHeight, cardX, cardY + cardHeight, radius);
-    ctx.arcTo(cardX, cardY + cardHeight, cardX, cardY, radius);
-    ctx.arcTo(cardX, cardY, cardX + cardWidth, cardY, radius);
-    ctx.closePath();
-    ctx.fill();
-    
-    ctx.shadowColor = "transparent"; // Reset shadow
-
-    // Card Text: Heading
-    ctx.font = "bold 45px sans-serif";
-    ctx.fillStyle = "#6B7280"; // Gray text
-    ctx.textAlign = "center";
-    ctx.fillText(headingText, 540, cardY + 130);
-
-    // Card Text: Amount
-    ctx.font = "bold 140px sans-serif";
-    ctx.fillStyle = amountColor;
-    ctx.fillText(`₹${Math.abs(amount)}`, 540, cardY + 300);
-
-    // Bottom Footer Branding
-    ctx.font = "bold 45px sans-serif";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText("₹ Khata App", 540, 1020);
-
-    // 3. Convert to Base64 Image
-    const base64Image = canvas.toDataURL("image/png");
-
-    // 4. Share via Plugin (Standard Share to attach image properly)
-    window.plugins.socialsharing.shareViaWhatsApp(
-        waCaption,      // Dynamic Message text
-        base64Image,    // Canvas Image
-        null,           // URL
-        function() { console.log("Shared successfully"); },
+    // Share via Plugin directly to the Receiver's chat
+    window.plugins.socialsharing.shareViaWhatsAppToReceiver(
+        formattedPhone, 
+        waText,      // Formatted Text
+        null,        // No Image
+        null,        // No URL
+        function() { console.log("Shared text successfully"); },
         function(err) { 
-            if(window.showAppToast) window.showAppToast("WhatsApp share failed.");
+            if(window.showAppToast) window.showAppToast("WhatsApp share failed. Contact might not exist on WhatsApp.");
         }
     );
-
 }
