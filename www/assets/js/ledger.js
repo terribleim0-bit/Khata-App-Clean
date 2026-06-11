@@ -541,7 +541,6 @@ function setupUI(customer, custId) {
     // 🟢 WHATSAPP & BOTTOM STRIP (Text Trigger)
     // ===============================================
     
-    // Handle WhatsApp Clicks
     const waClickHandler = (e) => {
         e.preventDefault();
         
@@ -581,22 +580,22 @@ function sendWhatsAppReminder(customerName, amount, customerPhone) {
         return;
     }
 
-    // Phone Number Formatting
+    // Phone Number Formatting (Crucial for WhatsApp intent)
     let formattedPhone = customerPhone.replace(/\D/g, ''); 
     if (formattedPhone.length === 10) {
         formattedPhone = '91' + formattedPhone; 
     }
 
     let waText = "";
-    const separator = "───────────────────";
+    const separator = "━━━━━━━━━━━━━━━━━━━━";
 
-    // Text Formatting using Unicode Lines and Bullets
+    // Text Formatting based on approved design
     if (amount < 0) {
-        waText = `*Khata App Reminder*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Payment Due\n• Balance: *₹${Math.abs(amount)}*\n${separator}\n▪ Please clear your dues at the earliest.\n▪ Sent via Khata App`;
+        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Payment Due Reminder*\nTotal Amount: *₹${Math.abs(amount)}*\n${separator}\n_Please clear your due amount at the earliest. I appreciate your support._`;
     } else if (amount > 0) {
-        waText = `*Khata App Update*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Advance Balance\n• Balance: *₹${Math.abs(amount)}*\n${separator}\n▪ You have an advance balance with us.\n▪ Sent via Khata App`;
+        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Advance Balance Update*\nTotal Amount: *₹${Math.abs(amount)}*\n${separator}\n_Your advance balance is safely updated. Thank you!_`;
     } else {
-        waText = `*Khata App Update*\n${separator}\n↳ *${customerName}*\n${separator}\n• Status: Settled\n• Balance: *₹0*\n${separator}\n▪ Your account is completely settled.\n▪ Sent via Khata App`;
+        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Account Fully Settled*\nTotal Amount: *₹0*\n${separator}\n_Your account is clear. Thank you for your continued association._`;
     }
 
     // Share via Plugin directly to the Receiver's chat
