@@ -484,17 +484,29 @@ function setupUI(customer, custId) {
 
 
     // ===============================================
-    // 🟢 WHATSAPP & BOTTOM STRIP (Standard English)
+    // 🟢 WHATSAPP & BOTTOM STRIP (Canvas Trigger)
     // ===============================================
-    let waText = `Hello ${customer.name},\n\n`;
-    if (total < 0) waText += `Your current due balance is ₹${Math.abs(total)}. Please clear your dues at your earliest convenience.`;
-    else if (total > 0) waText += `You have an advance balance of ₹${Math.abs(total)} with us.`;
-    else waText += `Your account balance is completely settled.`;
-    waText += `\n\nSent via Khata App`;
     
-    const waMsg = encodeURIComponent(waText);
-    setHref('strip-wa', `https://wa.me/?text=${waMsg}`);
-    setHref('modal-wa', `https://wa.me/?text=${waMsg}`);
+    // Handle Canvas Generator Clicks
+    const waClickHandler = (e) => {
+        e.preventDefault();
+        sendWhatsAppReminder(customer.name, total);
+    };
+
+    const stripWaBtn = document.getElementById('strip-wa');
+    const modalWaBtn = document.getElementById('modal-wa');
+    
+    if (stripWaBtn) {
+        stripWaBtn.onclick = waClickHandler;
+        stripWaBtn.removeAttribute('target');
+        stripWaBtn.removeAttribute('href');
+    }
+    if (modalWaBtn) {
+        modalWaBtn.onclick = waClickHandler;
+        modalWaBtn.removeAttribute('target');
+        modalWaBtn.removeAttribute('href');
+    }
+
 
     setText('strip-balance-value', `₹${Math.abs(total)}`);
     
@@ -517,3 +529,96 @@ function setupUI(customer, custId) {
 
 }    
     
+// ===============================================
+// 🟢 WHATSAPP IMAGE & CANVAS GENERATOR
+// ===============================================
+async function sendWhatsAppReminder(customerName, amount) {
+    if (!window.plugins || !window.plugins.socialsharing) {
+        if(window.showAppToast) window.showAppToast("Share plugin not installed. Please build APK again.");
+        return;
+    }
+
+    // 1. Dynamic Text Setup
+    let headingText = "";
+    let amountColor = "";
+    let waCaption = `Hello ${customerName},\n`;
+
+    if (amount < 0) {
+        headingText = "Payment Due Reminder!";
+        amountColor = "#ef4444"; // Status Red
+        waCaption += `Your balance of ₹${Math.abs(amount)} is Due. Please pay at the earliest.\n\nSent by: Khata App`;
+    } else if (amount > 0) {
+        headingText = "Advance Balance Update!";
+        amountColor = "#22c55e"; // Status Green
+        waCaption += `You have an advance balance of ₹${Math.abs(amount)} with us.\n\nSent by: Khata App`;
+    } else {
+        headingText = "Account Fully Settled!";
+        amountColor = "#4b5563"; // Dark Gray
+        waCaption += `Your account balance is completely settled.\n\nSent by: Khata App`;
+    }
+
+    // 2. Canvas Setup (1080x1080 Square)
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+
+    // Background (Apple Blue)
+    ctx.fillStyle = "#007AFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Center White Card Dimensions
+    const cardWidth = 880;
+    const cardHeight = 420;
+    const cardX = (1080 - cardWidth) / 2;
+    const cardY = (1080 - cardHeight) / 2;
+    const radius = 40;
+
+    // Draw White Card with Shadow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 20;
+    ctx.fillStyle = "#FFFFFF";
+    
+    // Fallback safe rounded rectangle for older Android WebViews
+    ctx.beginPath();
+    ctx.moveTo(cardX + radius, cardY);
+    ctx.arcTo(cardX + cardWidth, cardY, cardX + cardWidth, cardY + cardHeight, radius);
+    ctx.arcTo(cardX + cardWidth, cardY + cardHeight, cardX, cardY + cardHeight, radius);
+    ctx.arcTo(cardX, cardY + cardHeight, cardX, cardY, radius);
+    ctx.arcTo(cardX, cardY, cardX + cardWidth, cardY, radius);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.shadowColor = "transparent"; // Reset shadow
+
+    // Card Text: Heading
+    ctx.font = "bold 45px sans-serif";
+    ctx.fillStyle = "#6B7280"; // Gray text
+    ctx.textAlign = "center";
+    ctx.fillText(headingText, 540, cardY + 130);
+
+    // Card Text: Amount
+    ctx.font = "bold 140px sans-serif";
+    ctx.fillStyle = amountColor;
+    ctx.fillText(`₹${Math.abs(amount)}`, 540, cardY + 300);
+
+    // Bottom Footer Branding
+    ctx.font = "bold 45px sans-serif";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText("₹ Khata App", 540, 1020);
+
+    // 3. Convert to Base64 Image
+    const base64Image = canvas.toDataURL("image/png");
+
+    // 4. Share via Plugin
+    window.plugins.socialsharing.shareViaWhatsApp(
+        waCaption,     // Dynamic Message text
+        base64Image,   // Canvas Image
+        null,          // URL
+        function() { console.log("Shared successfully"); },
+        function(err) { 
+            if(window.showAppToast) window.showAppToast("WhatsApp share failed.");
+        }
+    );
+}
