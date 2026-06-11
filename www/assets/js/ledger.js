@@ -42,6 +42,9 @@ document.addEventListener('deviceready', function() {
             else history.back();
         });
     }
+    document.getElementById('more-modal-btn').addEventListener('click', toggleModal);
+    document.getElementById('modal-overlay').addEventListener('click', toggleModal);
+
     
     loadLedgerData();
 }, false);
