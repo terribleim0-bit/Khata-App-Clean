@@ -111,9 +111,9 @@
     <main id="ledger-main" class="flex-1 overflow-hidden relative flex flex-col">
         <div id="transaction-container" class="px-4 py-4 flex-1 overflow-y-auto flex flex-col-reverse relative">
             <!-- Expanded to full width using negative margins -->
-            <div id="bottom-controls-container" class="w-[calc(100%+2rem)] -mx-4 pt-2 z-30 transition-all duration-300 shrink-0" style="padding-bottom: calc(75px + env(safe-area-inset-bottom));">
+            <div id="bottom-controls-container" class="w-[calc(100%+2rem)] -mx-4 pt-2 z-30 transition-all duration-300 shrink-0" style="padding-bottom: calc(60px + env(safe-area-inset-bottom));">
                 
-                <div class="bg-[#007AFF]/10 dark:bg-[#0A84FF]/20 backdrop-blur-md rounded-t-[18px] rounded-b-[6px] flex justify-between items-center px-4 py-2 mb-1.5 w-full">
+                <div class="bg-[#007AFF]/10 dark:bg-[#0A84FF]/20 backdrop-blur-md rounded-t-[18px] flex justify-between items-center px-4 py-2 mb-1 w-full">
                     <div class="flex space-x-3 items-center">
                         <a id="strip-statement" href="#" class="bg-avatar text-white w-[26px] h-[26px] rounded-full flex items-center justify-center active:scale-90 transition-transform">
                             <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -132,7 +132,7 @@
                     </button>
                 </div>
 
-                <a id="strip-balance-btn" href="#" class="flex justify-between items-center px-4 py-2 bg-[#007AFF]/10 dark:bg-[#0A84FF]/20 backdrop-blur-md rounded-t-[6px] rounded-b-[18px] w-full active:bg-black/5 dark:active:bg-white/5 transition-colors">
+                <a id="strip-balance-btn" href="#" class="flex justify-between items-center px-4 py-2 bg-[#007AFF]/10 dark:bg-[#0A84FF]/20 backdrop-blur-md w-full active:bg-black/5 dark:active:bg-white/5 transition-colors">
                     <span id="strip-balance-label" class="text-[14px] font-medium text-secondary capitalize">Net Balance</span>
                     <div class="flex items-center gap-1.5 text-right">
                         <span id="strip-balance-value" class="text-[17px] font-bold tracking-tight text-primary">₹0</span>

@@ -2436,16 +2436,6 @@ video {
   border-bottom-left-radius: 16px;
 }
 
-.rounded-b-\[18px\] {
-  border-bottom-right-radius: 18px;
-  border-bottom-left-radius: 18px;
-}
-
-.rounded-b-\[6px\] {
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 6px;
-}
-
 .rounded-e {
   border-start-end-radius: 0.25rem;
   border-end-end-radius: 0.25rem;
@@ -2489,11 +2479,6 @@ video {
 .rounded-t-\[32px\] {
   border-top-left-radius: 32px;
   border-top-right-radius: 32px;
-}
-
-.rounded-t-\[6px\] {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
 }
 
 .rounded-bl {
