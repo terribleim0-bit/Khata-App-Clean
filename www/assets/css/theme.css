@@ -1181,14 +1181,6 @@ video {
   height: 100dvh;
 }
 
-.h-\[12px\] {
-  height: 12px;
-}
-
-.h-\[14px\] {
-  height: 14px;
-}
-
 .h-\[18px\] {
   height: 18px;
 }
@@ -1205,12 +1197,16 @@ video {
   height: 22px;
 }
 
-.h-\[26px\] {
-  height: 26px;
+.h-\[24px\] {
+  height: 24px;
 }
 
 .h-\[3px\] {
   height: 3px;
+}
+
+.h-\[40px\] {
+  height: 40px;
 }
 
 .h-\[42px\] {
@@ -1251,6 +1247,10 @@ video {
 
 .min-h-0 {
   min-height: 0px;
+}
+
+.min-h-\[48px\] {
+  min-height: 48px;
 }
 
 .min-h-\[56px\] {
@@ -1313,16 +1313,12 @@ video {
   width: 2rem;
 }
 
-.w-\[12px\] {
-  width: 12px;
-}
-
-.w-\[14px\] {
-  width: 14px;
-}
-
 .w-\[18px\] {
   width: 18px;
+}
+
+.w-\[1px\] {
+  width: 1px;
 }
 
 .w-\[20px\] {
@@ -1333,12 +1329,12 @@ video {
   width: 22px;
 }
 
-.w-\[26px\] {
-  width: 26px;
-}
-
 .w-\[280px\] {
   width: 280px;
+}
+
+.w-\[40px\] {
+  width: 40px;
 }
 
 .w-\[42px\] {
@@ -1372,6 +1368,10 @@ video {
 
 .min-w-\[170px\] {
   min-width: 170px;
+}
+
+.max-w-\[350px\] {
+  max-width: 350px;
 }
 
 .max-w-\[380px\] {
@@ -2463,11 +2463,6 @@ video {
   border-top-right-radius: 0.25rem;
 }
 
-.rounded-t-\[18px\] {
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
-}
-
 .rounded-t-\[20px\] {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
@@ -2674,14 +2669,6 @@ video {
   border-color: rgb(203 213 225 / var(--tw-border-opacity, 1));
 }
 
-.border-status-green {
-  border-color: var(--status-green);
-}
-
-.border-status-red {
-  border-color: var(--status-red);
-}
-
 .border-transparent {
   border-color: transparent;
 }
@@ -2707,10 +2694,6 @@ video {
 .bg-\[\#007AFF\] {
   --tw-bg-opacity: 1;
   background-color: rgb(0 122 255 / var(--tw-bg-opacity, 1));
-}
-
-.bg-\[\#007AFF\]\/10 {
-  background-color: rgb(0 122 255 / 0.1);
 }
 
 .bg-\[\#007AFF\]\/5 {
@@ -4601,10 +4584,6 @@ video {
 .dark\:bg-\[\#0A84FF\]:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(10 132 255 / var(--tw-bg-opacity, 1));
-}
-
-.dark\:bg-\[\#0A84FF\]\/20:is(.dark *) {
-  background-color: rgb(10 132 255 / 0.2);
 }
 
 .dark\:bg-\[\#0A84FF\]\/5:is(.dark *) {
