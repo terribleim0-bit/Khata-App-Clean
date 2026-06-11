@@ -628,15 +628,15 @@ async function sendWhatsAppReminder(customerName, amount, customerPhone) {
     // 3. Convert to Base64 Image
     const base64Image = canvas.toDataURL("image/png");
 
-    // 4. Share via Plugin directly to the Receiver's chat
-    window.plugins.socialsharing.shareViaWhatsAppToReceiver(
-        formattedPhone, // Specific contact number
+    // 4. Share via Plugin (Standard Share to attach image properly)
+    window.plugins.socialsharing.shareViaWhatsApp(
         waCaption,      // Dynamic Message text
         base64Image,    // Canvas Image
         null,           // URL
-        function() { console.log("Shared successfully to contact"); },
+        function() { console.log("Shared successfully"); },
         function(err) { 
-            if(window.showAppToast) window.showAppToast("WhatsApp share failed. Contact might not exist on WhatsApp.");
+            if(window.showAppToast) window.showAppToast("WhatsApp share failed.");
         }
     );
+
 }
