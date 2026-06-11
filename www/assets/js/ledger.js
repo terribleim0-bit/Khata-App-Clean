@@ -384,7 +384,7 @@ function setupUI(customer, custId) {
 
     renderTransactions(enrichedTxns);
 
-        // ===============================================
+    // ===============================================
     // 🟢 SEARCH LOGIC (Smart Date Filter & Auto Focus)
     // ===============================================
     const searchBtn = document.getElementById('search-toggle-btn');
@@ -490,7 +490,15 @@ function setupUI(customer, custId) {
     // Handle Canvas Generator Clicks
     const waClickHandler = (e) => {
         e.preventDefault();
-        sendWhatsAppReminder(customer.name, total);
+        
+        // Ensure phone exists before proceeding
+        const phoneStr = customer.phone;
+        if (!phoneStr || phoneStr.trim() === "") {
+            if(window.showAppToast) window.showAppToast("Phone number missing for this customer.");
+            return;
+        }
+
+        sendWhatsAppReminder(customer.name, total, phoneStr);
     };
 
     const stripWaBtn = document.getElementById('strip-wa');
@@ -506,6 +514,7 @@ function setupUI(customer, custId) {
         modalWaBtn.removeAttribute('target');
         modalWaBtn.removeAttribute('href');
     }
+
 
 
     setText('strip-balance-value', `₹${Math.abs(total)}`);
@@ -530,12 +539,20 @@ function setupUI(customer, custId) {
 }    
     
 // ===============================================
-// 🟢 WHATSAPP IMAGE & CANVAS GENERATOR
+// 🟢 WHATSAPP IMAGE & CANVAS GENERATOR (Direct to Contact)
 // ===============================================
-async function sendWhatsAppReminder(customerName, amount) {
+async function sendWhatsAppReminder(customerName, amount, customerPhone) {
     if (!window.plugins || !window.plugins.socialsharing) {
         if(window.showAppToast) window.showAppToast("Share plugin not installed. Please build APK again.");
         return;
+    }
+
+    // Phone Number Formatting (Crucial for WhatsApp API)
+    // Remove any spaces, dashes, or + signs
+    let formattedPhone = customerPhone.replace(/\D/g, ''); 
+    // If it's a standard 10-digit Indian number, add 91 prefix automatically
+    if (formattedPhone.length === 10) {
+        formattedPhone = '91' + formattedPhone; 
     }
 
     // 1. Dynamic Text Setup
@@ -611,14 +628,15 @@ async function sendWhatsAppReminder(customerName, amount) {
     // 3. Convert to Base64 Image
     const base64Image = canvas.toDataURL("image/png");
 
-    // 4. Share via Plugin
-    window.plugins.socialsharing.shareViaWhatsApp(
-        waCaption,     // Dynamic Message text
-        base64Image,   // Canvas Image
-        null,          // URL
-        function() { console.log("Shared successfully"); },
+    // 4. Share via Plugin directly to the Receiver's chat
+    window.plugins.socialsharing.shareViaWhatsAppToReceiver(
+        formattedPhone, // Specific contact number
+        waCaption,      // Dynamic Message text
+        base64Image,    // Canvas Image
+        null,           // URL
+        function() { console.log("Shared successfully to contact"); },
         function(err) { 
-            if(window.showAppToast) window.showAppToast("WhatsApp share failed.");
+            if(window.showAppToast) window.showAppToast("WhatsApp share failed. Contact might not exist on WhatsApp.");
         }
     );
 }
