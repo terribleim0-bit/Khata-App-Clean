@@ -45,6 +45,7 @@ document.addEventListener('deviceready', function() {
     
     loadLedgerData();
 }, false);
+
 // ===============================================
 // 🟢 FLOATING SCROLL-TO-BOTTOM LOGIC
 // ===============================================
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 // Page cache reload fallback
 window.addEventListener('pageshow', function (event) {
     if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
@@ -200,6 +202,7 @@ function loadLedgerData() {
         if(window.showAppToast) window.showAppToast("App encountered an error.");
     }
 }
+
 // ===============================================
 // 🟢 UI SETUP & BATCH RENDERING
 // ===============================================
@@ -481,10 +484,8 @@ function setupUI(customer, custId) {
         });
     }
 
-
-
     // ===============================================
-    // 🟢 WHATSAPP & BOTTOM STRIP (Canvas Trigger)
+    // 🟢 WHATSAPP & BOTTOM STRIP 
     // ===============================================
     
     // Handle Canvas Generator Clicks
@@ -515,8 +516,6 @@ function setupUI(customer, custId) {
         modalWaBtn.removeAttribute('href');
     }
 
-
-
     setText('strip-balance-value', `₹${Math.abs(total)}`);
     
     const sBal = document.getElementById('strip-balance-value');
@@ -536,40 +535,7 @@ function setupUI(customer, custId) {
 
     setText('strip-balance-label', `Balance ${total < 0 ? 'Due' : (total > 0 ? 'Advance' : 'Settled')}`);
 
-}    
-    // ===============================================
-    // 🟢 WHATSAPP & BOTTOM STRIP (Text Trigger)
-    // ===============================================
-    
-    const waClickHandler = (e) => {
-        e.preventDefault();
-        
-        const phoneStr = customer.phone;
-        if (!phoneStr || phoneStr.trim() === "") {
-            if(window.showAppToast) window.showAppToast("Phone number missing for this customer.");
-            return;
-        }
-
-        sendWhatsAppReminder(customer.name, total, phoneStr);
-    };
-
-    const stripWaBtn = document.getElementById('strip-wa');
-    const modalWaBtn = document.getElementById('modal-wa');
-    
-    if (stripWaBtn) {
-        stripWaBtn.onclick = waClickHandler;
-        stripWaBtn.removeAttribute('target');
-        stripWaBtn.removeAttribute('href');
-    }
-    if (modalWaBtn) {
-        modalWaBtn.onclick = waClickHandler;
-        modalWaBtn.removeAttribute('target');
-        modalWaBtn.removeAttribute('href');
-    }
-
-    // Is ton thalle balance strip wala code as-is rahega
-    setText('strip-balance-value', `₹${Math.abs(total)}`);
-    
+} // END OF setupUI Function
 
 // ===============================================
 // 🟢 WHATSAPP TEXT REMINDER (Direct to Contact)
