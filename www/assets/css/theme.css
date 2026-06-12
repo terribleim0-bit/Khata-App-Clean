@@ -1241,6 +1241,10 @@ video {
   height: 90px;
 }
 
+.h-\[65px\] {
+  height: 65px;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
@@ -1384,6 +1388,10 @@ video {
 
 .w-\[60px\] {
   width: 60px;
+}
+
+.w-\[65px\] {
+  width: 65px;
 }
 
 .min-w-0 {
@@ -2968,6 +2976,10 @@ video {
 .bg-yellow-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 252 232 / var(--tw-bg-opacity, 1));
+}
+
+.bg-status-green {
+  background-color: var(--status-green);
 }
 
 .bg-gradient-to-b {

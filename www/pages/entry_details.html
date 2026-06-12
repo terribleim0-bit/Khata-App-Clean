@@ -9,9 +9,7 @@
 
     <script src="../cordova.js"></script>
     
-    <!-- 🟢 Nawa CSS Link (Tailwind CDN aur script hata ditte) -->
     <link rel="stylesheet" href="../assets/css/theme.css">
-    
     <script defer src="../assets/js/theme.js"></script>
 
     <style>
@@ -20,133 +18,134 @@
     </style>
 </head>
 
-<!-- 🟢 Pakke rang hata ke config wale variables (bg-master, text-primary) lagaye -->
 <body class="bg-master text-primary flex flex-col h-[100dvh] overflow-hidden font-sans transition-colors duration-300 pb-[84px] antialiased">
 
-    <!-- 🟢 Premium Ledger Style Header (Glassmorphism, Chevron, Centered Text) -->
+    <!-- 🟢 HEADER (Ledger Style) -->
     <header class="relative bg-master/80 backdrop-blur-xl border-b border-line shrink-0 z-40 h-[60px] flex items-center justify-between px-4 transition-colors">
-        
         <button onclick="history.back()" class="p-2 -ml-2 text-brand active:opacity-50 transition-opacity z-10 shrink-0">
-            <!-- Ledger wala Chevron Icon -->
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
         </button>
-        
-        <!-- Centered Name -->
         <div class="flex-1 flex justify-center items-center overflow-hidden px-2">
             <h1 id="header-name" class="text-[17px] font-semibold leading-tight text-primary truncate">Loading...</h1>
         </div>
-
-        <!-- Right Side Space (Title center ch rakhan layi khali div) -->
         <div class="w-10 shrink-0"></div>
-        
     </header>
 
     <main class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center">
         
-        <!-- 🟢 AMOUNT CARD -->
-        <div class="w-full max-w-md bg-card rounded-3xl p-6 border border-line shadow-sm flex flex-col items-center justify-center mb-8 transition-colors">
-            <span id="detail-type-badge" class="text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border">ENTRY</span>
-            <div class="flex items-center space-x-2">
-                <span class="text-3xl font-light text-muted">₹</span>
-                <!-- Amount da color JS ton avega (text-status-red ya text-status-green) -->
-                <span id="detail-amount" class="text-5xl font-bold tracking-tight">0</span>
+        <!-- 🟢 CARD 1: Amount & Edit Button -->
+        <div class="w-full max-w-md bg-card rounded-3xl p-6 border border-line shadow-sm flex flex-col items-center justify-center mb-4 transition-colors relative">
+            <span id="detail-type-badge" class="text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-2 border hidden">ENTRY</span>
+            
+            <div class="flex items-center justify-center relative w-full">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl font-light text-muted">₹</span>
+                    <span id="detail-amount" class="text-5xl font-bold tracking-tight">0</span>
+                </div>
+                <!-- Edit Pencil right next to amount -->
+                <a id="top-edit-link" href="#" class="absolute right-4 p-2.5 bg-master rounded-full text-secondary border border-line active:scale-90 transition-transform">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </a>
             </div>
         </div>
 
-        <div class="w-full max-w-md space-y-4">
+        <!-- 🟢 CARD 2: Bill Gallery (Horizontal) -->
+        <div class="w-full max-w-md bg-card rounded-3xl p-4 border border-line shadow-sm mb-4 transition-colors flex flex-col">
+            <span id="bill-counter" class="hidden">0/5</span>
             
-            <!-- 🟢 COMPACT PHOTO GALLERY (Horizontal Swipe) -->
-            <div class="flex flex-col mb-4">
-                <!-- JS di zaroorat layi counter hidden rakheya hai -->
-                <span id="bill-counter" class="hidden">0/5</span>
+            <div class="flex items-center space-x-3 overflow-x-auto w-full shrink-0 snap-x" id="bills-scroll-row">
                 
-                <div class="flex items-center space-x-3 overflow-x-auto pb-2 w-full shrink-0 snap-x" id="bills-scroll-row">
-                    
-                    <!-- Add Image Square Button -->
-                    <div id="add-bill-trigger" class="shrink-0 w-[60px] h-[60px] rounded-[16px] border border-dashed border-brand bg-brand/5 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-all snap-start">
-                        <svg class="w-6 h-6 text-brand mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-                        <span class="text-[9px] font-bold text-brand uppercase tracking-tight mt-0.5">Add</span>
-                    </div>
+                <!-- Add Bill Camera Button -->
+                <div id="add-bill-trigger" class="shrink-0 w-[65px] h-[65px] rounded-[16px] border border-line bg-master flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-all snap-start">
+                    <svg class="w-6 h-6 text-brand mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="text-[9px] font-bold text-secondary uppercase tracking-tight mt-0.5">Add Bill</span>
+                </div>
 
-                    <!-- Thumbnails container jithe JS photos load karegi -->
-                    <div id="bills-thumb-container" class="flex items-center space-x-3"></div>
-                    
+                <!-- Thumbnails Container -->
+                <div id="bills-thumb-container" class="flex items-center space-x-3"></div>
+            </div>
+        </div>
+
+        <!-- 🟢 CARD 3: Single Line List (Details & Actions) -->
+        <div class="w-full max-w-md bg-card rounded-3xl border border-line shadow-sm overflow-hidden transition-colors flex flex-col mb-8">
+            
+            <!-- Note Row -->
+            <div id="note-edit-link" onclick="openNoteModal()" class="flex items-stretch min-h-[56px] active:bg-black/5 dark:active:bg-white/5 transition-colors cursor-pointer">
+                <div class="w-14 flex items-center justify-center shrink-0 text-secondary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </div>
+                <div class="flex-1 flex items-center border-b border-line pr-4">
+                    <p id="detail-note" class="text-[15px] font-medium text-primary truncate">Tap to add a note...</p>
                 </div>
             </div>
 
-            <!-- ... (Next Section start hovega, jiwein Notes etc.) ... -->
-
-
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[2px] px-2">Entry Details</p>
-
-            <div class="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-200 dark:border-[#2a2a2e] overflow-hidden transition-colors shadow-sm">
-                
-                <div id="note-edit-link" onclick="openNoteModal()" class="p-4 flex items-start border-b border-gray-100 dark:border-[#2a2a2e] active:bg-gray-50 dark:active:bg-[#252529] transition-colors cursor-pointer">
-                    <div class="p-2.5 bg-gray-50 dark:bg-[#121212] text-gray-500 dark:text-gray-400 rounded-xl mr-4 shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 flex justify-between">
-                            Notes <span class="text-blue-500 font-bold text-[9px] bg-blue-50 dark:bg-blue-900/20 px-1.5 rounded">EDIT</span>
-                        </p>
-                        <p id="detail-note" class="text-[15px] font-medium text-gray-800 dark:text-gray-200 break-words line-clamp-2">Add a note to this entry...</p>
-
-                    </div>
+            <!-- Added On Row -->
+            <div class="flex items-stretch min-h-[56px]">
+                <div class="w-14 flex items-center justify-center shrink-0 text-secondary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-
-                <div class="p-4 flex items-center border-b border-gray-100 dark:border-[#2a2a2e]">
-                    <div class="p-2.5 bg-gray-50 dark:bg-[#121212] text-gray-500 dark:text-gray-400 rounded-xl mr-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Added On</p>
-                        <p id="detail-date" class="text-[14px] font-medium text-gray-800 dark:text-gray-200">Loading...</p>
-                    </div>
-                </div>
-
-                <div id="edited-container" class="p-4 flex items-center hidden">
-                    <div class="p-2.5 bg-gray-50 dark:bg-[#121212] text-gray-500 dark:text-gray-400 rounded-xl mr-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Last Edited On</p>
-                        <p id="detail-edited-date" class="text-[14px] font-medium text-gray-800 dark:text-gray-200">Loading...</p>
-                    </div>
+                <div class="flex-1 flex items-center border-b border-line pr-4">
+                    <p class="text-[15px] font-medium text-secondary">Added <span id="detail-date" class="text-primary ml-1">Loading...</span></p>
                 </div>
             </div>
 
-            <p class="text-[10px] font-bold text-red-500 uppercase tracking-[2px] px-2 pt-2">Actions</p>
-
-            <div class="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-200 dark:border-[#2a2a2e] overflow-hidden transition-colors shadow-sm mb-6">
-                <a id="list-edit-btn" href="#" class="p-4 flex items-center border-b border-gray-100 dark:border-[#2a2a2e] active:bg-gray-50 dark:active:bg-[#252529] transition-colors cursor-pointer">
-                    <div class="p-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl mr-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    </div>
-                    <span class="font-bold text-[15px] text-gray-900 dark:text-white">Edit Transaction</span>
-                </a>
-
-                <a id="list-delete-btn" href="#" class="p-4 flex items-center active:bg-red-50 dark:active:bg-red-900/10 transition-colors cursor-pointer">
-                    <div class="p-2.5 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl mr-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </div>
-                    <span id="delete-text" class="font-bold text-[15px] text-red-500">Delete Entry</span>
-                </a>
+            <!-- Edited On Row (Hidden by default) -->
+            <div id="edited-container" class="flex items-stretch min-h-[56px] hidden">
+                <div class="w-14 flex items-center justify-center shrink-0 text-secondary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div class="flex-1 flex items-center border-b border-line pr-4">
+                    <p class="text-[15px] font-medium text-secondary">Edited <span id="detail-edited-date" class="text-primary ml-1">Loading...</span></p>
+                </div>
             </div>
+
+            <!-- Deleted On Row (Hidden by default) -->
+            <div id="deleted-container" class="flex items-stretch min-h-[56px] hidden">
+                <div class="w-14 flex items-center justify-center shrink-0 text-status-red">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                </div>
+                <div class="flex-1 flex items-center border-b border-line pr-4">
+                    <p class="text-[15px] font-medium text-status-red">Deleted <span id="detail-deleted-date" class="font-bold ml-1">Loading...</span></p>
+                </div>
+            </div>
+
+            <!-- Edit Transaction Row -->
+            <a id="list-edit-btn" href="#" class="flex items-stretch min-h-[56px] active:bg-black/5 dark:active:bg-white/5 transition-colors cursor-pointer">
+                <div class="w-14 flex items-center justify-center shrink-0 text-brand">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </div>
+                <div class="flex-1 flex items-center border-b border-line pr-4">
+                    <p class="text-[15px] font-medium text-primary">Edit Transaction</p>
+                </div>
+            </a>
+
+            <!-- Delete Entry Row (No Bottom Border!) -->
+            <a id="list-delete-btn" href="#" class="flex items-stretch min-h-[56px] active:bg-status-red/10 transition-colors cursor-pointer">
+                <div class="w-14 flex items-center justify-center shrink-0 text-status-red">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </div>
+                <div class="flex-1 flex items-center pr-4">
+                    <p id="delete-text" class="text-[15px] font-medium text-status-red">Delete Entry</p>
+                </div>
+            </a>
         </div>
     </main>
 
+    <!-- 🟢 MODALS (Updated to theme colors) -->
+    
+    <!-- Bill Add Modal -->
     <div id="billModal" class="fixed inset-0 z-[60] flex items-end justify-center hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity modal-overlay"></div>
-        <div class="modal-content relative w-full max-w-md bg-white dark:bg-[#1c1c1e] rounded-t-[28px] p-6 pb-10 transform translate-y-full transition-transform duration-300 shadow-2xl">
-            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 text-center">Attach Bill</h3>
+        <div class="modal-content relative w-full max-w-md bg-card rounded-t-[28px] p-6 pb-10 transform translate-y-full transition-transform duration-300 shadow-2xl">
+            <div class="w-12 h-1.5 bg-line rounded-full mx-auto mb-6"></div>
+            <h3 class="text-lg font-bold text-primary mb-4 text-center">Attach Bill</h3>
             <div class="flex flex-col gap-3 mb-2">
-                <button id="cam-capture-btn" class="w-full py-4 bg-gray-100 dark:bg-[#2a2a2e] text-gray-900 dark:text-gray-100 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-transform">
-                    <svg class="w-6 h-6 text-[#007AFF] dark:text-[#0A84FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <button id="cam-capture-btn" class="w-full py-4 bg-master text-primary font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-transform border border-line">
+                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Take Photo
                 </button>
-                <button id="cam-gallery-btn" class="w-full py-4 bg-gray-100 dark:bg-[#2a2a2e] text-gray-900 dark:text-gray-100 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-transform">
-                    <svg class="w-6 h-6 text-[#007AFF] dark:text-[#0A84FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <button id="cam-gallery-btn" class="w-full py-4 bg-master text-primary font-bold rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-transform border border-line">
+                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Choose from Gallery
                 </button>
                 <input type="file" id="native-gallery-input" multiple accept="image/*" class="hidden">
@@ -154,22 +153,24 @@
         </div>
     </div>
 
+    <!-- Note Edit Modal -->
     <div id="noteModal" class="fixed inset-0 z-[60] flex items-end justify-center hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity modal-overlay"></div>
-        <div class="modal-content relative w-full max-w-md bg-white dark:bg-[#1c1c1e] rounded-t-[28px] p-6 pb-10 transform translate-y-full transition-transform duration-300 shadow-2xl">
-            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <div class="modal-content relative w-full max-w-md bg-card rounded-t-[28px] p-6 pb-10 transform translate-y-full transition-transform duration-300 shadow-2xl">
+            <div class="w-12 h-1.5 bg-line rounded-full mx-auto mb-6"></div>
+            <h3 class="text-lg font-bold text-primary mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 Edit Note
-                <span class="text-[11px] font-medium text-gray-400">Max 150 chars</span>
+                <span class="text-[11px] font-medium text-secondary ml-auto">Max 150 chars</span>
             </h3>
-            <div class="bg-gray-50 dark:bg-[#121212] p-2 rounded-xl border border-gray-200 dark:border-[#2a2a2e] mb-6">
-                <input type="text" id="quick-note-input" maxlength="150" placeholder="Add a note..." class="w-full bg-transparent text-base text-gray-900 dark:text-gray-100 outline-none font-medium p-2">
+            <div class="bg-master p-2 rounded-xl border border-line mb-6">
+                <input type="text" id="quick-note-input" maxlength="150" placeholder="Add a note..." class="w-full bg-transparent text-base text-primary outline-none font-medium p-2 placeholder-muted">
             </div>
-            <button onclick="saveNote()" id="save-note-btn" class="w-full py-3.5 bg-[#007AFF] dark:bg-[#0A84FF] text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Save Note</button>
+            <button onclick="saveNote()" id="save-note-btn" class="w-full py-3.5 bg-brand text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">Save Note</button>
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="fixed inset-0 bg-black z-[70] hidden flex flex-col items-center justify-center transition-opacity opacity-0 duration-300">
         <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent z-50">
             <button onclick="history.back()" class="p-2 rounded-full bg-white/10 text-white active:scale-90 transition-transform">
@@ -184,30 +185,29 @@
         </div>
     </div>
 
-    <footer class="fixed bottom-0 w-full pb-4 pt-8 px-4 z-40 bg-gradient-to-t from-[#f2f2f7] dark:from-[#000000] via-[#f2f2f7]/80 dark:via-[#000000]/80 to-transparent pointer-events-none">
-        <div class="flex space-x-3 w-full max-w-md mx-auto pointer-events-auto">
+    <!-- 🟢 BOTTOM BUTTONS (Full Round) -->
+    <footer class="fixed bottom-0 w-full pb-4 pt-4 px-4 z-40 bg-master/90 backdrop-blur-md border-t border-line transition-colors">
+        <div class="flex space-x-3 w-full max-w-md mx-auto">
 
-            <button id="sms-share-btn" class="flex-1 bg-[#007AFF] dark:bg-[#0A84FF] border-none shadow-sm py-3 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
-                <svg class="w-5 h-5 text-white mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <button id="sms-share-btn" class="flex-1 bg-brand border-none py-3.5 rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <span class="text-[15px] font-bold text-white">
-                    SMS
-                </span>
+                <span class="text-[15px] font-bold text-white tracking-wide">SMS</span>
             </button>
 
-            <a id="wa-share-btn" href="#" target="_blank" class="flex-1 bg-[#22c55e] dark:bg-[#22c55e] border-none shadow-sm py-3 rounded-[14px] flex items-center justify-center active:scale-95 transition-transform">
-                <svg class="w-5 h-5 text-white mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+            <a id="wa-share-btn" href="#" target="_blank" class="flex-1 bg-status-green border-none py-3.5 rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                <svg class="w-5 h-5 text-white mr-2" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.012c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
                 </svg>
-                <span class="text-[15px] font-bold text-white">
-                    WhatsApp
-                </span>
+                <span class="text-[15px] font-bold text-white tracking-wide">WhatsApp</span>
             </a>
 
         </div>
     </footer>
+    
     <script src="../assets/js/db.js"></script>
-    <script src="../assets/js/ui.js"></script> <script src="../assets/js/entry_details.js"></script>
+    <script src="../assets/js/ui.js"></script> 
+    <script src="../assets/js/entry_details.js"></script>
 </body>
 </html>
