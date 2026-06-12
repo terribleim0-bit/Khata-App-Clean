@@ -1,82 +1,81 @@
 <!DOCTYPE html>
-<html lang="pa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Entry Details - Khata App</title>
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: cdvfile: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: cdvfile: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';">
 
     <script src="../cordova.js"></script>
-    <script src="../assets/js/tailwind.js"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' };
-    </script>
     
-    <script src="../assets/js/theme.js"></script>
-
-    <script>
-        document.addEventListener('deviceready', function() {
-            document.addEventListener('backbutton', function (e) {
-                e.preventDefault();
-                history.back(); 
-            }, false);
-
-            document.addEventListener('resume', function() {
-                const isLockEnabled = localStorage.getItem('app_lock_enabled') === 'true';
-                if (isLockEnabled) {
-                    sessionStorage.removeItem('unlocked');
-                    window.location.replace('lock.html');
-                }
-            }, false);
-        }, false);
-    </script>
+    <!-- 🟢 Nawa CSS Link (Tailwind CDN aur script hata ditte) -->
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    
+    <script defer src="../assets/js/theme.js"></script>
 
     <style>
         ::-webkit-scrollbar { display: none; }
         body { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
-<body class="bg-[#f4f6f8] dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 flex flex-col h-[100dvh] overflow-hidden transition-colors duration-300 pb-[84px]">
 
-    <header class="flex-none p-4 flex items-center justify-between border-b border-gray-200 dark:border-[#2a2a2e] bg-white dark:bg-[#121212] transition-colors shadow-sm z-40">
-        <div class="flex items-center">
-            <button onclick="history.back()" class="active:scale-90 transition-transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </button>
-            <h1 id="header-name" class="ml-4 text-xl font-bold">Loading...</h1>
+<!-- 🟢 Pakke rang hata ke config wale variables (bg-master, text-primary) lagaye -->
+<body class="bg-master text-primary flex flex-col h-[100dvh] overflow-hidden font-sans transition-colors duration-300 pb-[84px] antialiased">
+
+    <!-- 🟢 Premium Ledger Style Header (Glassmorphism, Chevron, Centered Text) -->
+    <header class="relative bg-master/80 backdrop-blur-xl border-b border-line shrink-0 z-40 h-[60px] flex items-center justify-between px-4 transition-colors">
+        
+        <button onclick="history.back()" class="p-2 -ml-2 text-brand active:opacity-50 transition-opacity z-10 shrink-0">
+            <!-- Ledger wala Chevron Icon -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        
+        <!-- Centered Name -->
+        <div class="flex-1 flex justify-center items-center overflow-hidden px-2">
+            <h1 id="header-name" class="text-[17px] font-semibold leading-tight text-primary truncate">Loading...</h1>
         </div>
-        <a id="top-edit-link" href="#" class="p-2 bg-gray-100 dark:bg-[#1c1c1e] rounded-full text-gray-600 dark:text-gray-400 active:scale-90 transition-transform">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-        </a>
+
+        <!-- Right Side Space (Title center ch rakhan layi khali div) -->
+        <div class="w-10 shrink-0"></div>
+        
     </header>
 
     <main class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center">
         
-        <div class="w-full max-w-md bg-white dark:bg-[#1c1c1e] rounded-3xl p-6 border border-gray-200 dark:border-[#2a2a2e] shadow-sm flex flex-col items-center justify-center mb-6 transition-colors">
+        <!-- 🟢 AMOUNT CARD -->
+        <div class="w-full max-w-md bg-card rounded-3xl p-6 border border-line shadow-sm flex flex-col items-center justify-center mb-8 transition-colors">
             <span id="detail-type-badge" class="text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border">ENTRY</span>
             <div class="flex items-center space-x-2">
-                <span class="text-3xl font-light text-gray-400">₹</span>
+                <span class="text-3xl font-light text-muted">₹</span>
+                <!-- Amount da color JS ton avega (text-status-red ya text-status-green) -->
                 <span id="detail-amount" class="text-5xl font-bold tracking-tight">0</span>
             </div>
         </div>
 
-        <div class="w-full max-w-md space-y-5">
+        <div class="w-full max-w-md space-y-4">
             
-            <div class="flex flex-col">
-                <div class="flex justify-between items-center px-2 mb-2">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[2px]">Bills</p>
-                    <span id="bill-counter" class="text-[11px] font-bold text-gray-400 bg-gray-200/60 dark:bg-white/5 px-2 py-0.5 rounded-full">0/5</span>
-                </div>
+            <!-- 🟢 COMPACT PHOTO GALLERY (Horizontal Swipe) -->
+            <div class="flex flex-col mb-4">
+                <!-- JS di zaroorat layi counter hidden rakheya hai -->
+                <span id="bill-counter" class="hidden">0/5</span>
                 
-                <div class="flex items-center space-x-3 overflow-x-auto pb-2 px-1 w-full shrink-0" id="bills-scroll-row">
-                    <div id="add-bill-trigger" class="shrink-0 w-[64px] h-[64px] rounded-xl border-2 border-dashed border-blue-600 dark:border-blue-500 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-all bg-blue-50/50 dark:bg-blue-900/10">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-500 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-                        <span class="text-[9px] font-bold text-blue-600 dark:text-blue-500 uppercase tracking-tight">Add Pics</span>
+                <div class="flex items-center space-x-3 overflow-x-auto pb-2 w-full shrink-0 snap-x" id="bills-scroll-row">
+                    
+                    <!-- Add Image Square Button -->
+                    <div id="add-bill-trigger" class="shrink-0 w-[60px] h-[60px] rounded-[16px] border border-dashed border-brand bg-brand/5 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-all snap-start">
+                        <svg class="w-6 h-6 text-brand mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                        <span class="text-[9px] font-bold text-brand uppercase tracking-tight mt-0.5">Add</span>
                     </div>
+
+                    <!-- Thumbnails container jithe JS photos load karegi -->
                     <div id="bills-thumb-container" class="flex items-center space-x-3"></div>
+                    
                 </div>
             </div>
+
+            <!-- ... (Next Section start hovega, jiwein Notes etc.) ... -->
+
 
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[2px] px-2">Entry Details</p>
 

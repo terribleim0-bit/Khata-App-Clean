@@ -1382,6 +1382,10 @@ video {
   width: 100%;
 }
 
+.w-\[60px\] {
+  width: 60px;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -2714,6 +2718,10 @@ video {
 .border-yellow-100 {
   --tw-border-opacity: 1;
   border-color: rgb(254 249 195 / var(--tw-border-opacity, 1));
+}
+
+.border-brand {
+  border-color: var(--brand-blue);
 }
 
 .bg-\[\#007AFF\] {
