@@ -113,16 +113,17 @@ function updateUI() {
     const badgeEl = document.getElementById('detail-type-badge');
     const isGiven = foundTxn.type === 'given';
     
-    // 🟢 NAVA LOGIC: Check Delete Status
+    // 🟢 Check Delete Status
     const isDeleted = (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true');
     
     amtEl.textContent = foundTxn.amount;
+    badgeEl.classList.remove('hidden'); 
     
     if (isDeleted) {
         // Deleted UI
-        amtEl.className = 'text-5xl font-bold tracking-tight text-gray-400 line-through decoration-2';
+        amtEl.className = 'text-5xl font-bold tracking-tight ml-1 text-muted line-through decoration-2';
         badgeEl.textContent = isGiven ? 'GIVEN (DELETED)' : 'GOT (DELETED)';
-        badgeEl.className = 'text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border text-gray-400 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50';
+        badgeEl.className = 'text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border text-muted border-line bg-master';
         
         // Hide Top Edit Link
         const topEdit = document.getElementById('top-edit-link');
@@ -131,87 +132,76 @@ function updateUI() {
         // Disable Note Editing
         const noteEditLink = document.getElementById('note-edit-link');
         if(noteEditLink) {
-            noteEditLink.onclick = null; // Click band
-            noteEditLink.classList.remove('active:bg-gray-50', 'dark:active:bg-[#252529]', 'cursor-pointer');
-            const editBadge = noteEditLink.querySelector('span'); // EDIT likheya hoya badge
-            if(editBadge) editBadge.style.display = 'none';
+            noteEditLink.onclick = null; 
+            noteEditLink.classList.remove('active:bg-black/5', 'dark:active:bg-white/5', 'cursor-pointer');
         }
 
-        // Hide Actions Box (Edit/Delete entry buttons)
-        const editBtn = document.getElementById('list-edit-btn');
-        if(editBtn && editBtn.parentElement) {
-            editBtn.parentElement.style.display = 'none'; // Box gayab
-            // Hide the "Actions" text above the box
-            const actionsTitle = editBtn.parentElement.previousElementSibling;
-            if(actionsTitle) actionsTitle.style.display = 'none';
-        }
+        // 🟢 THE FIX: ਸਿਰਫ ਬਟਨ ਲੁਕਾਉਣੇ ਹਨ, ਪੂਰਾ ਡੱਬਾ ਨਹੀਂ!
+        const listEditBtn = document.getElementById('list-edit-btn');
+        if(listEditBtn) listEditBtn.style.display = 'none';
+        
+        const listDeleteBtn = document.getElementById('list-delete-btn');
+        if(listDeleteBtn) listDeleteBtn.style.display = 'none';
 
         // Hide Delete icon in Image Preview
         const previewDelBtn = document.getElementById('preview-delete-btn');
         if(previewDelBtn) previewDelBtn.style.display = 'none';
 
+        // 🟢 Show "Deleted On" Row cleanly
+        if (foundTxn.deleted_on) {
+            const delCont = document.getElementById('deleted-container');
+            if(delCont) delCont.classList.remove('hidden');
+            const delDate = new Date(Number(foundTxn.deleted_on));
+            document.getElementById('detail-deleted-date').textContent = `${delDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${delDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        }
+
     } else {
-        // Normal UI
-        amtEl.className = `text-5xl font-bold tracking-tight ${isGiven ? 'text-[#ef4444]' : 'text-[#22c55e]'}`;
+        // Normal UI (Using new theme colors)
+        amtEl.className = `text-5xl font-bold tracking-tight ml-1 ${isGiven ? 'text-status-red' : 'text-status-green'}`;
         badgeEl.textContent = isGiven ? 'YOU GAVE' : 'YOU GOT';
-        badgeEl.className = `text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border ${isGiven ? 'text-[#ef4444] border-[#ef4444] bg-red-50 dark:bg-red-900/10' : 'text-[#22c55e] border-[#22c55e] bg-green-50 dark:bg-green-900/10'}`;
+        badgeEl.className = `text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border ${isGiven ? 'text-status-red border-status-red/30 bg-status-red/10' : 'text-status-green border-status-green/30 bg-status-green/10'}`;
     }
 
+    // 🟢 Note Logic
     const noteEl = document.getElementById('detail-note');
     originalNote = (foundTxn.note || "").trim();
     if (originalNote && originalNote.toLowerCase() !== "received" && originalNote.toLowerCase() !== "given") {
         noteEl.textContent = originalNote;
-        noteEl.classList.remove('text-gray-400', 'italic');
+        noteEl.classList.remove('text-muted');
+        noteEl.classList.add('text-primary'); 
     } else {
         noteEl.textContent = isDeleted ? "No note added." : "Tap to add a note...";
-        noteEl.classList.add('text-gray-400', 'italic');
+        noteEl.classList.add('text-muted');
+        noteEl.classList.remove('text-primary');
         originalNote = "";
     }
 
+    // 🟢 Added On Logic
     const d = new Date(Number(foundTxn.date));
     document.getElementById('detail-date').textContent = `${d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
 
+    // 🟢 Edited On Logic
     if (foundTxn.is_edited && foundTxn.edited_on) {
         const e = new Date(Number(foundTxn.edited_on));
         const edCont = document.getElementById('edited-container');
-        edCont.classList.remove('hidden');
-        edCont.classList.add('border-t', 'border-gray-100', 'dark:border-[#2a2a2e]');
+        if(edCont) edCont.classList.remove('hidden');
         document.getElementById('detail-edited-date').textContent = `${e.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${e.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
     }
 
-    // 🟢 JS automatically "Deleted On" row banayegi je zarurat hove (Bina HTML chhede)
-    if (isDeleted && foundTxn.deleted_on) {
-        let delCont = document.getElementById('deleted-container');
-        if(!delCont) {
-            const edCont = document.getElementById('edited-container');
-            // Insert after edited container (or date if not edited)
-            edCont.insertAdjacentHTML('afterend', `
-            <div id="deleted-container" class="p-4 flex items-center border-t border-gray-100 dark:border-[#2a2a2e] bg-red-50/50 dark:bg-red-900/10 rounded-b-2xl">
-                <div class="p-2.5 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-xl mr-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </div>
-                <div>
-                    <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider mb-0.5">Deleted On</p>
-                    <p id="detail-deleted-date" class="text-[14px] font-medium text-red-700 dark:text-red-400">Loading...</p>
-                </div>
-            </div>`);
-            delCont = document.getElementById('deleted-container');
-        }
-        delCont.classList.remove('hidden');
-        const delDate = new Date(Number(foundTxn.deleted_on));
-        document.getElementById('detail-deleted-date').textContent = `${delDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${delDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-    }
-
+    // 🟢 Links & Buttons
     const editUrl = `edit_confirm.html?id=${currentTxnId}&custId=${foundCustomer.id}`;
     const delUrl = `delete_warning.html?id=${currentTxnId}&custId=${foundCustomer.id}`; 
     document.getElementById('top-edit-link').href = editUrl;
     document.getElementById('list-edit-btn').href = editUrl;
     document.getElementById('list-delete-btn').href = delUrl;
-    document.getElementById('delete-text').textContent = `Delete ${isGiven ? 'Given' : 'Received'} Entry`;
+    
+    const deleteTextEl = document.getElementById('delete-text');
+    if(deleteTextEl) deleteTextEl.textContent = `Delete ${isGiven ? 'Given' : 'Received'} Entry`;
 
     renderBillsGallery(isDeleted);
     buildWhatsAppShareLink(isDeleted);
 }
+
 // assets/js/entry_details.js (PART 2)
 
 // 🟢 renderBillsGallery vich isDeleted check add kitta hai
