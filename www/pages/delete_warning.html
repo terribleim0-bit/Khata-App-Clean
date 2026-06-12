@@ -3,42 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Delete Transaction Warning</title>
+    <title>Delete Transaction</title>
+    <script src="../cordova.js"></script>
     
+
     
-
-    <script>tailwind.config = { darkMode: 'class' };</script>
-    <script src="../assets/js/theme.js"></script>
-
-    <script>
-        document.addEventListener('deviceready', function() {
-            document.addEventListener('backbutton', function (e) {
-                e.preventDefault();
-                history.back(); 
-            }, false);
-
-            document.addEventListener('resume', function() {
-                const isLockEnabled = localStorage.getItem('app_lock_enabled') === 'true';
-                if (isLockEnabled) {
-                    sessionStorage.removeItem('unlocked');
-                    window.location.replace('lock.html');
-                }
-            }, false);
-        }, false);
-    </script>
-
-    <style>
-        ::-webkit-scrollbar { display: none; }
-        body { font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    <script defer src="../assets/js/theme.js"></script>
+    <script defer src="../assets/js/ui.js"></script> 
+    <style> 
+        @font-face {
+            font-family: 'Inter';
+            src: url('assets/fonts/Inter.ttf') format('truetype'); 
+            font-weight: 100 900; 
+            font-display: swap;
+        }
     </style>
-
-<link rel="stylesheet" href="../assets/css/theme.css">
+    
+    
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    
+    
 </head>
-<body class="bg-[#f7f9fa] dark:bg-[#0a0a0a] text-[#1c1c1e] dark:text-gray-100 flex flex-col h-[100dvh] overflow-hidden transition-colors duration-300">
+<body class="bg-master text-primary flex flex-col h-[100dvh] overflow-hidden transition-colors duration-300">
 
-    <header class="flex-none p-4 flex items-center border-b border-gray-200 dark:border-[#2a2a2e] bg-white dark:bg-[#121212] transition-colors">
-        <button onclick="history.back()" class="text-gray-600 dark:text-gray-400 active:scale-95 transition-transform">
+    <header class="flex-none p-4 flex items-center border-b border-line bg-master transition-colors">
+        <button onclick="history.back()" class="text-primary active:scale-95 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -46,48 +35,42 @@
         <h1 class="ml-4 text-xl font-bold">Delete Entry</h1>
     </header>
 
-    <main class="flex-1 overflow-y-auto px-5 pt-12 pb-32 flex flex-col items-center">
+    <main class="flex-1 overflow-y-auto px-5 pt-8 pb-10 flex flex-col items-center">
         
-        <div id="status-icon" class="mb-4 flex items-center justify-center"></div>
-
-        <h2 class="font-bold text-2xl mb-6 text-[#1c1c1e] dark:text-gray-100 tracking-tight">Delete this entry?</h2>
-        
-        <div class="w-full bg-white dark:bg-[#1c1c1e] rounded-2xl p-5 border border-gray-100 dark:border-[#2a2a2e] shadow-sm mb-6 transition-colors">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h3 class="text-[15px] font-bold text-gray-500 dark:text-gray-400">Entry Amount</h3>
-                    <p id="txn-date" class="text-[13px] text-gray-400 dark:text-gray-500 mt-1">Loading date...</p>
-                </div>
-                <div class="text-right">
-                    <p id="txn-amount" class="text-2xl font-bold text-[#1c1c1e] dark:text-gray-100 leading-tight">₹0</p>
+        <div class="w-full max-w-md bg-card rounded-3xl p-5 border border-line shadow-sm mb-6 transition-colors">
+            
+            <div class="flex items-start gap-3">
+                <div id="type-icon" class="mt-1 shrink-0"></div> 
+                
+                <div class="flex-1">
+                    <div class="flex items-baseline gap-1.5 flex-wrap">
+                        <span id="type-text" class="text-[16px] font-medium text-primary"></span>
+                        <span id="txn-amount" class="text-[18px] font-bold">₹0</span>
+                    </div>
+                    <p id="txn-date" class="text-[14px] text-muted mt-0.5">Loading date...</p>
                 </div>
             </div>
             
-            <div id="txn-note-container" class="mt-4 pt-4 border-t border-gray-100 dark:border-[#2a2a2e] hidden">
-                <div class="flex items-start">
-                    <svg class="w-4 h-4 text-gray-400 mt-0.5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
-                    <p id="txn-note" class="text-[14px] text-gray-600 dark:text-gray-300 font-medium break-words">Note text</p>
+            <div id="txn-note-container" class="hidden">
+                <div class="ml-9 border-t border-line my-3"></div> <div class="flex items-start gap-3">
+                    <div class="w-6 shrink-0 flex justify-center">
+                        <svg class="w-4 h-4 text-muted mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+                    </div>
+                    <p id="txn-note" class="text-[14px] text-primary font-medium break-words"></p>
                 </div>
             </div>
+
         </div>
 
-        <p class="text-[14px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium text-center px-2">
-            Eh entry delete ho jayegi aur customer da balance update ho jayega. Tusi isnu baad vich sirf dekh sakoge, edit nahi.
-        </p>
+        <button id="confirm-del-btn" class="w-full max-w-md bg-transparent border-2 border-status-red text-status-red font-bold text-[16px] py-3.5 rounded-2xl active:bg-status-red/10 active:scale-95 transition-all flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Delete Entry
+        </button>
 
     </main>
 
-    <footer class="fixed bottom-0 w-full px-5 py-6 pb-safe z-40 flex flex-col gap-3">
-        <button id="confirm-del-btn" class="w-full bg-transparent border-2 border-[#ef4444] text-[#ef4444] font-bold text-[16px] py-4 rounded-xl active:scale-95 transition-all flex items-center justify-center">
-            Yes, Delete Entry
-        </button>
-        <button onclick="history.back()" class="w-full bg-gray-100 dark:bg-[#1c1c1e] text-gray-600 dark:text-gray-300 font-bold text-[16px] py-4 rounded-xl active:scale-95 transition-all border border-transparent dark:border-[#2a2a2e]">
-            Cancel
-        </button>
-    </footer>
-    <script src="../assets/js/ui.js"></script>
+    
     <script src="../assets/js/db.js"></script>
     <script src="../assets/js/delete_warning.js"></script>
-    <script src="../cordova.js"></script>
-</body>
+    
 </html>

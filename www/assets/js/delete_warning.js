@@ -1,88 +1,111 @@
-// assets/js/delete_warning.js
+let currentTxnId = null;
+let currentCustId = null;
+let foundTxn = null;
 
 document.addEventListener('deviceready', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const txnId = urlParams.get('id');
-    const custId = urlParams.get('custId');
+    currentTxnId = urlParams.get('id');
+    currentCustId = urlParams.get('custId');
 
-    if (!txnId || !custId || !window.db) return window.history.back();
+    if (!currentTxnId || !currentCustId) return history.back();
+
+    loadEntryData();
+
+    document.getElementById('confirm-del-btn').onclick = () => {
+        // Apple style Confirm Modal
+        if(window.showConfirmModal) {
+            window.showConfirmModal(
+                "Delete Entry", 
+                "This entry will be deleted and the customer's balance will be updated. Deleted entries can only be viewed, not edited.", 
+                "Delete", 
+                executeDelete
+            );
+        } else {
+            // Fallback (in case ui.js is missing)
+            if(confirm("Delete this entry?")) executeDelete();
+        }
+    };
+}, false);
+
+function loadEntryData() {
+    if (!window.db) return history.back();
 
     db.transaction(function(tx) {
-        tx.executeSql('SELECT * FROM transactions WHERE id = ?', [txnId], function(tx, rs) {
-            if (rs.rows.length === 0) return window.history.back();
+        tx.executeSql('SELECT * FROM transactions WHERE id = ?', [currentTxnId], function(tx, rs) {
+            if (rs.rows.length === 0) return history.back();
+            foundTxn = rs.rows.item(0);
             
-            const txn = rs.rows.item(0);
-            const isGive = txn.type === 'given';
-            
-            const amtEl = document.getElementById('txn-amount');
-            // Rupee symbol corruption fixed here
-            amtEl.textContent = `₹${txn.amount}`;
-            amtEl.className = `text-2xl font-bold leading-tight ${isGive ? 'text-[#EF4444]' : 'text-[#22C55E]'}`;
-
-            const d = new Date(Number(txn.date));
-            document.getElementById('txn-date').textContent = `${d.toLocaleDateString('en-GB')} at ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-
-            // Note dikhaun da logic
-            const noteContainer = document.getElementById('txn-note-container');
-            const noteEl = document.getElementById('txn-note');
-            const noteText = (txn.note || "").trim();
-            
-            if (noteText && noteText.toLowerCase() !== "received" && noteText.toLowerCase() !== "given") {
-                noteEl.textContent = noteText;
-                if(noteContainer) noteContainer.classList.remove('hidden');
+            // If already deleted, just go back
+            if(foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true') {
+                history.back();
+                return;
             }
-
-            document.getElementById('confirm-del-btn').onclick = () => {
-                const hasPin = localStorage.getItem('khata_pin');
-
-                if (hasPin) {
-                    // Je PIN hai taan Security Verify (Lock Screen) te bhejo
-                    window.location.replace(`security_verify.html?action=delete_entry&id=${txnId}&custId=${custId}`);
-                } else {
-                    // Je PIN nahi hai taan sidha Confirm karwa ke Delete karo
-                    if (confirm("Are you sure you want to delete this entry?")) {
-                        const currentTime = Date.now();
-                        
-                        // 🟢 FIX 1: Generate dynamic activity text for deletion
-                        const dateStr = window.getFormattedDate(currentTime);
-                        const activityText = `₹${txn.amount} Entry Deleted on ${dateStr}`;
-                        
-                        // 🟢 FIX 2: SINGLE TRANSACTION BLOCK FOR ATOMICITY
-                        db.transaction(function(tx) {
-                            
-                            // Step 1: Soft Delete the transaction
-                            tx.executeSql('UPDATE transactions SET is_deleted = 1, deleted_on = ? WHERE id = ?', 
-                                [currentTime, txnId]);
-
-                            // Step 2: Recalculate Balance
-                            tx.executeSql('SELECT type, amount FROM transactions WHERE customer_id = ? AND (is_deleted IS NULL OR is_deleted = 0)', 
-                                [custId], 
-                                function(tx, rsCalc) {
-                                    let netBal = 0;
-                                    for(let i = 0; i < rsCalc.rows.length; i++) {
-                                        let t = rsCalc.rows.item(i);
-                                        netBal += (t.type === 'given') ? -parseFloat(t.amount) : parseFloat(t.amount);
-                                    }
-
-                                    // Step 3: Update Customer Balance AND last_activity_text
-                                    tx.executeSql('UPDATE customers SET balance = ?, updated_at = ?, last_activity_text = ? WHERE id = ?', 
-                                        [netBal, currentTime, activityText, custId]);
-                                }
-                            );
-
-                        }, function(error) {
-                            // Single error block catches any failure in the above 3 steps
-                            if(window.showToast) showToast("Entry Delete Error: " + error.message);
-                        }, function() {
-                            // Success block runs only if ALL steps succeed
-                            if(window.showToast) showToast("Entry deleted successfully");
-                            setTimeout(() => {
-                                history.back();
-                            }, 100);
-                        });
-                    }
-                }
-            };
+            
+            renderUI();
         });
     });
-}, false);
+}
+
+function renderUI() {
+    const isGiven = foundTxn.type === 'given';
+    
+    // 1. Set Icons and Text based on Type
+    const iconContainer = document.getElementById('type-icon');
+    const textEl = document.getElementById('type-text');
+    const amtEl = document.getElementById('txn-amount');
+    
+    if (isGiven) {
+        // Red Up Arrow for Given
+        iconContainer.innerHTML = `<svg class="w-6 h-6 text-status-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"></path></svg>`;
+        textEl.textContent = "Credit Given:";
+        amtEl.textContent = `₹ ${foundTxn.amount}`;
+        amtEl.className = 'text-[18px] font-bold text-status-red';
+    } else {
+        // Green Down Arrow for Received
+        iconContainer.innerHTML = `<svg class="w-6 h-6 text-status-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 4.5l-15 15m0 0h11.25m-11.25 0V8.25"></path></svg>`;
+        textEl.textContent = "Payment Received:";
+        amtEl.textContent = `₹ ${foundTxn.amount}`;
+        amtEl.className = 'text-[18px] font-bold text-status-green';
+    }
+
+    // 2. Set Date
+    const d = new Date(Number(foundTxn.date));
+    const timeStr = d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    // getFormattedDate UI.js vichon aayega (e.g., "14 May, 2026")
+    const dateStr = window.getFormattedDate ? window.getFormattedDate(Number(foundTxn.date)) : d.toLocaleDateString();
+    document.getElementById('txn-date').textContent = `${dateStr}, ${timeStr}`;
+
+    // 3. Set Note (Hide divider and section if note is empty)
+    const noteEl = document.getElementById('txn-note');
+    const noteContainer = document.getElementById('txn-note-container');
+    const originalNote = (foundTxn.note || "").trim();
+    
+    if (originalNote && originalNote.toLowerCase() !== "received" && originalNote.toLowerCase() !== "given") {
+        noteEl.textContent = originalNote;
+        noteContainer.classList.remove('hidden');
+    } else {
+        noteContainer.classList.add('hidden');
+    }
+}
+
+function executeDelete() {
+    const deleteTime = Date.now();
+    db.transaction(function(tx) {
+        // Mark as deleted in database
+        tx.executeSql('UPDATE transactions SET is_deleted = 1, deleted_on = ? WHERE id = ?', [deleteTime, currentTxnId], function(tx, rs) {
+            
+            // Show Success Toast
+            if (window.showAppToast) {
+                window.showAppToast("Entry Deleted Successfully");
+            }
+            
+            // Go back after slight delay to let toast trigger
+            setTimeout(() => {
+                history.back();
+            }, 300);
+            
+        }, function(tx, error) {
+            if (window.showAppToast) window.showAppToast("Failed to delete entry", "error");
+        });
+    });
+}

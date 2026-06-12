@@ -883,6 +883,11 @@ video {
   margin-right: auto;
 }
 
+.my-3 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -1013,6 +1018,10 @@ video {
 
 .mt-6 {
   margin-top: 1.5rem;
+}
+
+.ml-9 {
+  margin-left: 2.25rem;
 }
 
 .box-border {
@@ -2749,6 +2758,10 @@ video {
 .border-gray-500 {
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
+}
+
+.border-status-red {
+  border-color: var(--status-red);
 }
 
 .bg-\[\#007AFF\] {
