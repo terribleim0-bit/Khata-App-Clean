@@ -158,7 +158,10 @@
         </div>
     </div>
 
-    <div id="imagePreviewModal" class="fixed inset-0 bg-black z-[70] hidden flex flex-col items-center justify-center transition-opacity opacity-0 duration-300">
+    <!-- 🟢 Image Preview Modal (Swipe & Thumbnails) -->
+    <div id="imagePreviewModal" class="fixed inset-0 bg-black z-[70] hidden flex flex-col transition-opacity opacity-0 duration-300">
+        
+        <!-- Top Action Bar -->
         <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent z-50">
             <button onclick="history.back()" class="p-2 rounded-full bg-white/10 text-white active:scale-90 transition-transform">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -167,10 +170,21 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
         </div>
-        <div class="w-full h-full flex items-center justify-center p-4">
-            <img id="full-preview-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="max-w-full max-h-full object-contain rounded-lg" alt="Full Preview">
+        
+        <!-- Main Image Area (Swipeable) -->
+        <div class="flex-1 w-full h-full flex items-center justify-center p-4 relative" id="preview-swipe-area">
+            <img id="full-preview-img" src="" class="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200" alt="Full Preview">
+        </div>
+
+        <!-- Bottom Thumbnails Strip -->
+        <div class="absolute bottom-8 w-full px-4 z-50 flex justify-center pointer-events-none">
+            <!-- pointer-events-auto added so we can click thumbs, but swipe through the gap -->
+            <div id="preview-thumbnails-container" class="flex items-center space-x-3 overflow-x-auto bg-black/50 p-2.5 rounded-2xl backdrop-blur-md max-w-full pointer-events-auto shadow-2xl">
+                <!-- JS will inject thumbnails here -->
+            </div>
         </div>
     </div>
+
 
     <footer class="fixed bottom-0 w-full pb-4 pt-4 px-4 z-40 bg-master/90 backdrop-blur-md border-t border-line transition-colors">
         <div class="flex space-x-3 w-full max-w-md mx-auto">

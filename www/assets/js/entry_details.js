@@ -1,11 +1,11 @@
-// assets/js/entry_details.js (PART 1)
-
 let currentTxnId = null;
 let currentCustId = null;
 let originalNote = "";
 let foundCustomer = null;
 let foundTxn = null;
 let activePreviewIndex = null;
+let previewStartX = 0;
+let previewEndX = 0;
 const MAX_BILLS = 5;
 
 // Nawa tracking variable Modals layi
@@ -36,6 +36,20 @@ document.addEventListener('deviceready', () => {
         document.getElementById('native-gallery-input').click();
     };
 
+    // Swipe Listeners
+    const swipeArea = document.getElementById('preview-swipe-area');
+    if(swipeArea) {
+        swipeArea.addEventListener('touchstart', e => {
+            previewStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        swipeArea.addEventListener('touchend', e => {
+            previewEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+    }
+
+    // Native Gallery Input Listener
     document.getElementById('native-gallery-input').addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
         if (!files || files.length === 0) return;
@@ -202,9 +216,7 @@ function updateUI() {
     buildWhatsAppShareLink(isDeleted);
 }
 
-// assets/js/entry_details.js (PART 2)
 
-// 🟢 renderBillsGallery vich isDeleted check add kitta hai
 function renderBillsGallery(isDeleted = false) {
     const billPaths = foundTxn.bill_paths || [];
     const counterEl = document.getElementById('bill-counter');
@@ -214,7 +226,6 @@ function renderBillsGallery(isDeleted = false) {
     container.innerHTML = '';
 
     const triggerBox = document.getElementById('add-bill-trigger');
-    // Je delete ho chuki hai ya max bill ho gaye ne, taan Add button luka deyo
     if (isDeleted || billPaths.length >= MAX_BILLS) {
         if(triggerBox) triggerBox.style.display = 'none';
     } else {
@@ -263,28 +274,86 @@ function renderBillsGallery(isDeleted = false) {
     }, 150);
 }
 
+
 function launchFullScreenPreview(index) {
     activePreviewIndex = index;
-    const fileName = foundTxn.bill_paths[index];
-    const fullImgNode = document.getElementById('full-preview-img');
-
     toggleModal('imagePreviewModal', true);
+    renderPreviewScreen();
+}
+
+function renderPreviewScreen() {
+    const billPaths = foundTxn.bill_paths || [];
+    if (billPaths.length === 0) return history.back(); 
+    
+    if (activePreviewIndex >= billPaths.length) activePreviewIndex = billPaths.length - 1;
+    if (activePreviewIndex < 0) activePreviewIndex = 0;
+
+    const fileName = billPaths[activePreviewIndex];
+    const fullImgNode = document.getElementById('full-preview-img');
 
     if (window.cordova && cordova.file && cordova.file.dataDirectory) {
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory + fileName, function(fileEntry) {
             fullImgNode.src = fileEntry.toInternalURL();
-        }, function() {
-            fullImgNode.src = "";
-        });
+        }, function() { fullImgNode.src = ""; });
     } else {
-        fullImgNode.src = "https://via.placeholder.com/400x600/1a73e8/FFFFFF?text=Bill+Preview";
+        fullImgNode.src = "https://via.placeholder.com/400x600/1a73e8/FFFFFF?text=Bill+" + (activePreviewIndex + 1);
+    }
+
+    const thumbContainer = document.getElementById('preview-thumbnails-container');
+    thumbContainer.innerHTML = '';
+    
+    if (billPaths.length <= 1) {
+        thumbContainer.parentElement.style.display = 'none';
+        return;
+    } else {
+        thumbContainer.parentElement.style.display = 'flex';
+    }
+
+    billPaths.forEach((path, i) => {
+        const is_active = (i === activePreviewIndex);
+        const thumb = document.createElement('img');
+        
+        thumb.className = `w-12 h-12 object-cover rounded-xl transition-all duration-300 cursor-pointer shrink-0 ${is_active ? 'border-[2.5px] border-brand scale-110 opacity-100 shadow-lg' : 'border border-gray-500 opacity-50 scale-100 active:scale-95'}`;
+        
+        if (window.cordova && cordova.file) {
+             window.resolveLocalFileSystemURL(cordova.file.dataDirectory + path, function(fileEntry) {
+                thumb.src = fileEntry.toInternalURL();
+            });
+        } else {
+            thumb.src = "https://via.placeholder.com/150/1a73e8/FFFFFF?text=Thumb";
+        }
+
+        thumb.onclick = (e) => {
+            e.stopPropagation();
+            activePreviewIndex = i;
+            renderPreviewScreen();
+        };
+        thumbContainer.appendChild(thumb);
+    });
+}
+
+
+function handleSwipe() {
+    const threshold = 50; 
+    const billPaths = foundTxn.bill_paths || [];
+    
+    if (previewEndX < previewStartX - threshold) {
+        if (activePreviewIndex < billPaths.length - 1) {
+            activePreviewIndex++;
+            renderPreviewScreen();
+        }
+    }
+    if (previewEndX > previewStartX + threshold) {
+        if (activePreviewIndex > 0) {
+            activePreviewIndex--;
+            renderPreviewScreen();
+        }
     }
 }
 
+
 function deleteActiveImage() {
     if (activePreviewIndex === null) return;
-    
-    // Je delete ho chuki entry hai taan photo vi delete nahi hon deni
     if(foundTxn && (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true')) {
         if(window.showAppToast) showAppToast("Cannot delete image from deleted entry.");
         return;
@@ -295,12 +364,18 @@ function deleteActiveImage() {
 
     db.transaction(function(tx) {
         tx.executeSql('UPDATE transactions SET bill_paths = ? WHERE id = ?', [updatedPathsStr, currentTxnId], function(tx, rs) {
-            history.back(); // Modal band karan layi
             if(window.showAppToast) showAppToast("Image Deleted Successfully");
+            
+            if (foundTxn.bill_paths.length === 0) {
+                history.back(); 
+            } else {
+                renderPreviewScreen(); 
+            }
             loadTransactionData(); 
         });
     });
 }
+
 
 function captureBillImage(sourceType) {
     if(foundTxn && (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true')) return;
@@ -341,7 +416,7 @@ function attachBillToData(savedFileName) {
     });
 }
 
-// 🟢 WhatsApp link vich 'DELETED' status add kitta hai
+
 function buildWhatsAppShareLink(isDeleted = false) {
     const d = new Date(Number(foundTxn.date));
     const dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
@@ -368,7 +443,7 @@ function buildWhatsAppShareLink(isDeleted = false) {
     }
 }
 
-// 🟢 SMS link vich vi 'DELETED' status add kitta hai
+
 function triggerSMSIntent() {
     const d = new Date(Number(foundTxn.date));
     const dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
@@ -389,7 +464,7 @@ function triggerSMSIntent() {
     }
 }
 
-// 🟢 Nawa Master Modal Function
+
 function toggleModal(modalId, show) {
     const m = document.getElementById(modalId);
     if(!m) return;
@@ -401,7 +476,6 @@ function toggleModal(modalId, show) {
             c.style.transform = '';
             setTimeout(() => c.classList.remove('translate-y-full'), 10);
         } else {
-            // image preview layi opacity use hundi hai
             setTimeout(() => m.classList.remove('opacity-0'), 10);
         }
         if(modalId === 'noteModal') setTimeout(() => document.getElementById('quick-note-input').focus(), 300);
@@ -421,7 +495,7 @@ function toggleModal(modalId, show) {
     }
 }
 
-// 🟢 Android Back Button (Popstate) Logic
+
 window.addEventListener('popstate', (e) => {
     if (activeModal) {
         const m = document.getElementById(activeModal);
@@ -468,7 +542,7 @@ window.saveNote = function() {
     });
 };
 
-// 🟢 Nawa Swipe Down Logic
+
 function setupSwipeToClose() {
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', () => {
@@ -512,4 +586,4 @@ function setupSwipeToClose() {
             }
         }, { passive: true });
     });
-                        }
+}
