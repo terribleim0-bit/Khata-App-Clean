@@ -709,16 +709,16 @@ video {
   bottom: 2rem;
 }
 
+.bottom-\[100px\] {
+  bottom: 100px;
+}
+
 .bottom-\[170px\] {
   bottom: 170px;
 }
 
 .bottom-\[30px\] {
   bottom: 30px;
-}
-
-.bottom-\[80px\] {
-  bottom: 80px;
 }
 
 .left-0 {
@@ -1225,8 +1225,8 @@ video {
   height: 64px;
 }
 
-.h-\[75px\] {
-  height: 75px;
+.h-\[65px\] {
+  height: 65px;
 }
 
 .h-full {
