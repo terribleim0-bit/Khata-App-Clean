@@ -888,6 +888,11 @@ video {
   margin-bottom: 0.75rem;
 }
 
+.my-3\.5 {
+  margin-top: 0.875rem;
+  margin-bottom: 0.875rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -1022,6 +1027,10 @@ video {
 
 .ml-9 {
   margin-left: 2.25rem;
+}
+
+.ml-\[48px\] {
+  margin-left: 48px;
 }
 
 .box-border {
@@ -1405,6 +1414,10 @@ video {
 
 .w-\[65px\] {
   width: 65px;
+}
+
+.w-9 {
+  width: 2.25rem;
 }
 
 .min-w-0 {
