@@ -3,6 +3,7 @@
 let delCurrentTxnId = null;
 let delCurrentCustId = null;
 let delFoundTxn = null;
+let delFoundCust = null; // Customer da data store karan layi
 let isDelInitialized = false;
 
 // ===============================================
@@ -57,17 +58,23 @@ function loadDeleteEntryData() {
     if (!window.db) return AppRouter.goBack();
 
     db.transaction(function(tx) {
-        tx.executeSql('SELECT * FROM transactions WHERE id = ?', [delCurrentTxnId], function(tx, rs) {
-            if (rs.rows.length === 0) return AppRouter.goBack();
-            delFoundTxn = rs.rows.item(0);
-            
-            // Je pehlan hi delete ho chuki hai taan wapis bhej do
-            if (delFoundTxn.is_deleted == 1 || String(delFoundTxn.is_deleted) === 'true') {
-                AppRouter.goBack();
-                return;
-            }
-            
-            renderDeleteUI();
+        // Pehlan customer da naam labho
+        tx.executeSql('SELECT * FROM customers WHERE id = ?', [delCurrentCustId], function(tx, custRs) {
+            if (custRs.rows.length === 0) return AppRouter.goBack();
+            delFoundCust = custRs.rows.item(0);
+
+            // Phir transaction di detail labho
+            tx.executeSql('SELECT * FROM transactions WHERE id = ?', [delCurrentTxnId], function(tx, txnRs) {
+                if (txnRs.rows.length === 0) return AppRouter.goBack();
+                delFoundTxn = txnRs.rows.item(0);
+                
+                if (delFoundTxn.is_deleted == 1 || String(delFoundTxn.is_deleted) === 'true') {
+                    AppRouter.goBack();
+                    return;
+                }
+                
+                renderDeleteUI();
+            });
         });
     });
 }
@@ -75,10 +82,14 @@ function loadDeleteEntryData() {
 function renderDeleteUI() {
     const isGiven = delFoundTxn.type === 'given';
     
+    // Header vich Customer da naam set karo
+    document.getElementById('del-entry-header-name').textContent = delFoundCust.name;
+
     const iconContainer = document.getElementById('del-entry-icon');
     const textEl = document.getElementById('del-entry-type-text');
     const amtEl = document.getElementById('del-entry-amount');
     
+    // Icon te color setting
     if (isGiven) {
         iconContainer.innerHTML = `<svg class="w-7 h-7 text-status-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"></path></svg>`;
         textEl.textContent = "Credit Given";
@@ -145,9 +156,6 @@ function executeDatabaseDelete() {
         if (window.showAppToast) window.showAppToast("Failed to delete entry. Database Error.", "error");
     }, function() {
         if (window.showAppToast) window.showAppToast("Entry Deleted & Balance Updated!");
-        // Thoda delay taanki user Toast message dekh sake
-        setTimeout(() => {
-            AppRouter.goBack();
-        }, 200);
+        setTimeout(() => { AppRouter.goBack(); }, 200);
     });
 }

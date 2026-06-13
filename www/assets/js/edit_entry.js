@@ -56,7 +56,7 @@ function loadEditTransactionData() {
                 if (txnRs.rows.length === 0) { AppRouter.goBack(); return; }
                 editFoundTxn = txnRs.rows.item(0);
 
-                document.getElementById('edit-header-name').textContent = "Editing for " + editFoundCust.name;
+                document.getElementById('edit-header-name').textContent = editFoundCust.name;
                 if(editFoundTxn.date) {
                     const dateObj = new Date(Number(editFoundTxn.date));
                     document.getElementById('edit-header-date').textContent = "Txn Date: " + dateObj.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
