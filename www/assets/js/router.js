@@ -1,7 +1,6 @@
 // assets/js/router.js
 
 const AppRouter = {
-    // Hun history sirf string nahi, objects store karegi: { screenId, params }
     history: [], 
 
     init: function() {
@@ -10,6 +9,23 @@ const AppRouter = {
 
         // Android hardware Back Button control
         document.addEventListener("backbutton", (e) => {
+            
+            // 🟢 NAYA FIX: Modal Aware Logic (Bug Fix)
+            // Router check karega ki current screen te koi modal open taan nahi hai?
+            const activeScreen = document.querySelector('.app-screen.active');
+            if (activeScreen) {
+                // Koi vi element jisde ID vich "Modal" hai aur oh "hidden" nahi hai, usnu labho
+                const openModals = activeScreen.querySelectorAll('.fixed[id*="Modal"]:not(.hidden)');
+                
+                if (openModals.length > 0) {
+                    // Je modal open hai, taan router pichhe nahi jayega!
+                    // Screen da apna personal JS code us modal nu band karega.
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Normal Router Logic
             if (this.history.length > 1) {
                 e.preventDefault();
                 this.goBack(); 
@@ -20,20 +36,14 @@ const AppRouter = {
     },
 
     navigate: function(screenId, params = {}) {
-        // Nayi screen te jaan lage, usda naam te params dono history ch push karo
         this.history.push({ screenId: screenId, params: params });
         this.showScreen(screenId, true, params);
     },
 
     goBack: function() {
         if (this.history.length > 1) {
-            // 1. Current screen nu history cho kadd deo (Pop)
             this.history.pop();
-            
-            // 2. Pichli bachi hoyi screen da data labho
             const previousState = this.history[this.history.length - 1];
-            
-            // 3. Pichli screen nu usde apne purane params de naal load karo
             this.showScreen(previousState.screenId, false, previousState.params);
         }
     },
@@ -47,7 +57,6 @@ const AppRouter = {
         if (targetScreen) {
             targetScreen.classList.add('active');
             
-            // Data load karan layi custom event (Hun hamesha sahi params jaan ge)
             const event = new CustomEvent('screenChanged', { detail: { screenId, isForward, params } });
             document.dispatchEvent(event);
         }
