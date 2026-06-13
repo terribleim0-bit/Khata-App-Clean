@@ -22,10 +22,9 @@
             -webkit-tap-highlight-color: transparent; 
             touch-action: manipulation; 
         } 
-        
         .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
         
-        /* SPA Screen Setup */
+        /* 🟢 SPA Screen Setup */
         .app-screen {
             display: none; 
             position: absolute;
@@ -41,13 +40,14 @@
             z-index: 10;
         }
 
-        /* Animations */
+        /* Home Screen Animations */
         #fab-container a { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #fab-container span { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; overflow: hidden; white-space: nowrap; }
         #fab-container.shrunk a { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
         #fab-container.shrunk span { max-width: 0 !important; margin-left: 0 !important; opacity: 0 !important; }
         .fade-transition { transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hidden-state { opacity: 0 !important; transform: translateY(-10px) !important; pointer-events: none !important; position: absolute; }
+        .app-locked { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body class="bg-master text-primary antialiased select-none h-[100dvh] overflow-hidden relative transition-colors duration-300">
@@ -62,7 +62,7 @@
                     </div>
                     <h1 class="text-[17px] font-semibold text-primary tracking-wide">Khata App</h1>
                 </div>
-                <button id="search-toggle-btn" class="p-2 -mr-2 text-brand active:scale-[0.98] transition-all z-10">
+                <button id="search-toggle-btn" class="p-2 -mr-2 text-brand active:scale-[0.98] active:opacity-50 transition-all z-10">
                     <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
             </div>
@@ -70,11 +70,11 @@
                 <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 min-w-0">
                     <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <input type="text" id="search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] text-primary placeholder-gray-500 px-2" placeholder="Search customers...">
-                    <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 flex items-center justify-center">
+                    <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 outline-none flex items-center justify-center">
                         <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <button id="cancel-search-btn" class="text-[17px] text-brand active:opacity-50 shrink-0">Cancel</button>
+                <button id="cancel-search-btn" class="text-[17px] text-brand active:opacity-50 shrink-0 outline-none">Cancel</button>
             </div>
         </header>
 
@@ -93,24 +93,23 @@
         </main>
 
         <div id="fab-container" class="fixed bottom-[95px] right-4 z-50 fade-transition">
-            <a onclick="AppRouter.navigate('screen-form')" class="flex items-center bg-brand text-white px-5 py-3.5 rounded-full shadow-lg active:scale-[0.98] transition-all cursor-pointer">
+            <a onclick="AppRouter.navigate('screen-form')" class="cursor-pointer flex items-center bg-brand text-white px-5 py-3.5 rounded-full shadow-lg active:scale-[0.98] transition-all">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
                 <span class="font-semibold text-[15px] ml-2 tracking-wide">Add Customer</span>
             </a>
         </div>
 
         <nav id="bottom-nav" class="fixed bottom-0 w-full bg-master border-t border-line flex justify-around items-center h-[90px] pb-safe z-50">
-            <a class="flex flex-col items-center justify-center w-full h-full text-brand cursor-pointer">
+            <a class="cursor-pointer flex flex-col items-center justify-center w-full h-full text-brand">
                 <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span class="text-[10px] font-medium">Home</span>
             </a>
-            <a onclick="AppRouter.navigate('screen-settings')" class="flex flex-col items-center justify-center w-full h-full text-secondary active:opacity-70 cursor-pointer">
+            <a onclick="AppRouter.navigate('screen-settings')" class="cursor-pointer flex flex-col items-center justify-center w-full h-full text-secondary active:opacity-70">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 <span class="text-[10px] font-medium">Settings</span>
             </a>
         </nav>
     </div>
-
     <div id="screen-ledger" class="app-screen">
         
         <header class="relative bg-master/80 backdrop-blur-xl border-b border-line shrink-0 z-40 h-[60px] overflow-hidden transition-colors">
@@ -135,24 +134,19 @@
             <div id="ledger-header-search" class="absolute inset-0 flex items-center px-4 transition-opacity duration-300 opacity-0 pointer-events-none z-10">
                 <div class="flex-1 flex items-center bg-card rounded-[10px] pl-2.5 pr-1.5 py-1.5 border border-line min-w-0">
                     <svg class="w-[20px] h-[20px] text-secondary shrink-0 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    
                     <input type="text" id="ledger-search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-muted px-2" placeholder="Search...">
-                    
                     <button id="ledger-btn-clear-search" class="hidden shrink-0 text-secondary p-1 active:opacity-50 outline-none flex items-center justify-center">
                         <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                
-                <button id="ledger-cancel-search-btn" class="ml-3 text-brand text-[17px] font-normal active:scale-[0.98] active:opacity-50 shrink-0 transition-all">
-                    Cancel
-                </button>
+                <button id="ledger-cancel-search-btn" class="ml-3 text-brand text-[17px] font-normal active:scale-[0.98] active:opacity-50 shrink-0 transition-all">Cancel</button>
             </div>
         </header>
 
         <main id="ledger-main" class="flex-1 overflow-hidden relative flex flex-col"> 
             <div id="transaction-container" class="px-4 py-4 flex-1 overflow-y-auto flex flex-col-reverse relative">
+                
                 <div id="bottom-controls-container" class="w-[calc(100%+2rem)] -mx-4 z-30 transition-all duration-300 shrink-0 flex flex-col bg-master border-t border-line rounded-t-[24px] overflow-hidden" style="padding-bottom: calc(53px + env(safe-area-inset-bottom));">
-                    
                     <div class="flex items-center justify-between px-4 py-2 min-h-[44px]">
                         <div class="flex space-x-3 items-center">
                             <a id="strip-statement" class="bg-card border border-line text-primary w-[25px] h-[25px] rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-sm cursor-pointer">
@@ -165,7 +159,6 @@
                                 <svg class="w-[13px] h-[13px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </a>
                         </div>
-                        
                         <button id="more-modal-btn" class="bg-card border border-line text-brand w-[25px] h-[25px] rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-sm">
                             <svg class="w-[15px] h-[15px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>
                         </button>
@@ -189,25 +182,19 @@
         </main>
 
         <button id="fab-scroll-bottom" class="fixed right-4 bottom-[170px] w-[42px] h-[42px] bg-fab backdrop-blur-md border border-input rounded-full flex items-center justify-center shadow-lg text-brand z-30 transition-all duration-300 opacity-0 scale-90 pointer-events-none active:bg-fab-active">
-            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
+            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
         </button>
 
         <footer id="ledger-footer" class="fixed bottom-0 w-full z-40 bg-master transition-all duration-300" style="padding-bottom: env(safe-area-inset-bottom);">
             <div class="flex justify-center items-center px-4 py-3 w-full">
                 <div class="bg-card border border-line rounded-full flex items-center w-full max-w-[350px] overflow-hidden shadow-sm">
-                    
                     <a id="receive-btn" class="flex-1 flex justify-center items-center px-4 py-2 min-h-[44px] bg-transparent active:bg-black/5 dark:active:bg-white/5 transition-colors cursor-pointer">
                         <span class="text-[16px] font-bold text-status-green">↓ Received</span>
                     </a>
-                    
                     <div class="w-[1px] h-[24px] bg-line"></div>
-                    
                     <a id="give-btn" class="flex-1 flex justify-center items-center px-4 py-2 min-h-[44px] bg-transparent active:bg-black/5 dark:active:bg-white/5 transition-colors cursor-pointer">
                         <span class="text-[16px] font-bold text-status-red">↑ Given</span>
                     </a>
-
                 </div>
             </div>
         </footer>
@@ -223,38 +210,29 @@
                 <h2 class="text-center font-bold text-[18px] text-primary mt-1 mb-4 tracking-tight">Customer Actions</h2>
 
                 <div class="px-4 mb-2 space-y-3">
-                    
                     <a id="modal-statement" class="flex items-center justify-center w-full bg-white dark:bg-[#2c2c2e] rounded-[14px] px-4 py-4 shadow-sm active:bg-gray-100 dark:active:bg-gray-600 transition-colors cursor-pointer">
                         <svg class="w-5 h-5 text-[#007AFF] dark:text-[#0A84FF] mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span class="font-semibold text-primary text-[16px]">View Statement</span>
                     </a>
-
                     <a id="modal-wa" class="flex items-center justify-center w-full bg-white dark:bg-[#2c2c2e] rounded-[14px] px-4 py-4 shadow-sm active:bg-gray-100 dark:active:bg-gray-600 transition-colors cursor-pointer">
                         <svg class="w-4 h-4 text-status-green mr-2 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.012c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                         <span class="font-semibold text-primary text-[16px]">WhatsApp Reminder</span>
                     </a>
-
                     <a id="modal-delete" class="flex items-center justify-center w-full bg-white dark:bg-[#2c2c2e] rounded-[14px] px-4 py-4 shadow-sm active:bg-gray-100 dark:active:bg-gray-600 transition-colors cursor-pointer">
                         <svg class="w-5 h-5 text-status-red mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         <span class="font-semibold text-status-red text-[16px]">Delete Customer</span>
                     </a>
-
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="screen-form" class="app-screen">
-        <div class="flex items-center justify-center h-full text-secondary">Add Customer Form (Loading...)</div>
-    </div>
-    <div id="screen-settings" class="app-screen">
-        <div class="flex items-center justify-center h-full text-secondary">Settings Screen (Loading...)</div>
-    </div>
-
     <script src="cordova.js"></script>
     <script src="assets/js/db.js"></script>
     <script src="assets/js/ui.js"></script>
     <script src="assets/js/router.js"></script>
     <script src="assets/js/home.js"></script>
+    
+    <script src="assets/js/ledger.js"></script>
+
 </body>
 </html>
