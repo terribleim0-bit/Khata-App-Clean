@@ -1,102 +1,68 @@
-// ===============================================
-// 🟢 STATE MANAGER (Hardware Back Button & Search)
-// ===============================================
+// assets/js/ledger.js
+
 let isModalOpen = false;
-let isSearchOpen = false;
+let isLedgerSearchOpen = false; 
+let currentLedgerCustId = null;
+let currentLedgerCustomerObj = null;
 
-document.addEventListener('deviceready', function() {
-    
-    // Hardware back button logic
-    document.addEventListener('backbutton', function (e) {
-        e.preventDefault();
+// ===============================================
+// 🟢 1. SPA SCREEN CHANGED EVENT (Main Trigger)
+// ===============================================
+document.addEventListener('screenChanged', (e) => {
+    if (e.detail.screenId === 'screen-ledger') {
+        currentLedgerCustId = e.detail.params ? e.detail.params.id : currentLedgerCustId;
         
-        if (isModalOpen) {
-            toggleModal(); // Close modal first
+        if(!currentLedgerCustId) {
+            AppRouter.goBack(); 
             return;
         }
         
-        if (isSearchOpen) {
-            toggleSearch(); // Close search next
-            return;
-        }
+        // Reset UI States
+        if(isModalOpen) toggleModal();
+        if(isLedgerSearchOpen) toggleLedgerSearch();
         
-        // Silent exit
-        history.back(); 
-    }, false);
-
-    // Resume lock logic
-    document.addEventListener('resume', function() {
-        const isLockEnabled = localStorage.getItem('app_lock_enabled') === 'true';
-        if (isLockEnabled) {
-            sessionStorage.removeItem('unlocked');
-            window.location.replace('lock.html');
-        }
-    }, false);
-    
-    // Custom header back button link
-    const backBtn = document.getElementById('back-btn');
-    if(backBtn) {
-        backBtn.addEventListener('click', () => {
-            if (isModalOpen) toggleModal();
-            else if (isSearchOpen) toggleSearch();
-            else history.back();
-        });
+        loadLedgerData(currentLedgerCustId);
     }
-    document.getElementById('more-modal-btn').addEventListener('click', toggleModal);
-    document.getElementById('modal-overlay').addEventListener('click', toggleModal);
+});
 
+// ===============================================
+// 🟢 2. BACK BUTTON LOGIC (SPA Friendly)
+// ===============================================
+document.addEventListener('backbutton', function (e) {
+    // Sirf odo chalega jado Ledger Screen sahmne hove
+    if (!document.getElementById('screen-ledger').classList.contains('active')) return;
     
-    loadLedgerData();
+    if (isModalOpen) {
+        e.preventDefault();
+        toggleModal();
+        return;
+    }
+    if (isLedgerSearchOpen) {
+        e.preventDefault();
+        toggleLedgerSearch();
+        return;
+    }
 }, false);
 
-// ===============================================
-// 🟢 FLOATING SCROLL-TO-BOTTOM LOGIC
-// ===============================================
-document.addEventListener('DOMContentLoaded', () => {
-    // 🟢 NAVA FIX: Hun aapa 'transaction-container' di scroll track karni hai
-    const scrollContainer = document.getElementById('transaction-container');
-    const fabScrollBottom = document.getElementById('fab-scroll-bottom');
+const ledgerBackBtn = document.getElementById('ledger-back-btn');
+if(ledgerBackBtn) {
+    ledgerBackBtn.addEventListener('click', () => {
+        if (isModalOpen) toggleModal();
+        else if (isLedgerSearchOpen) toggleLedgerSearch();
+        else AppRouter.goBack();
+    });
+}
 
-    if (scrollContainer && fabScrollBottom) {
-        scrollContainer.addEventListener('scroll', () => {
-            // Reverse list vich scroll thalle 0 hunda hai, upar jaan te negative (minus) hunda hai
-            const scrolledAmount = Math.abs(scrollContainer.scrollTop);
-            
-            // Je 150px ton zyada upar gya, taan button dikhao
-            if (scrolledAmount > 150) {
-                fabScrollBottom.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
-            } else {
-                fabScrollBottom.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
-            }
-        });
+// Modal Logic (Exact Same as before)
+document.getElementById('more-modal-btn').addEventListener('click', toggleModal);
+document.getElementById('modal-overlay').addEventListener('click', toggleModal);
 
-        // Button click hon te wapas '0' (Bottom) te le aao
-        fabScrollBottom.addEventListener('click', () => {
-            scrollContainer.scrollTo({
-                top: 0, // Reverse flexbox ch 0 da matlab thalle (bottom) hunda hai!
-                behavior: 'smooth'
-            });
-        });
-    }
-});
-
-// Page cache reload fallback
-window.addEventListener('pageshow', function (event) {
-    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-        window.location.reload();
-    }
-});
-
-// ===============================================
-// 🟢 MODAL TOGGLE & SWIPE DOWN TO CLOSE (GPU Accel)
-// ===============================================
 function toggleModal() {
     const m = document.getElementById('moreModal');
     const c = document.getElementById('modalContent');
     if(!m || !c) return;
     
     if(!isModalOpen) {
-        // Open
         m.classList.remove('hidden');
         isModalOpen = true;
         requestAnimationFrame(() => {
@@ -104,7 +70,6 @@ function toggleModal() {
             c.style.transform = 'translateY(0)';
         });
     } else {
-        // Close
         isModalOpen = false;
         requestAnimationFrame(() => {
             m.classList.add('opacity-0');
@@ -114,124 +79,96 @@ function toggleModal() {
     }
 }
 
-// Swipe down logic
+// Swipe down logic (Exact Same)
 const modalContent = document.getElementById('modalContent');
 if(modalContent) {
-    let startY = 0;
-    let currentY = 0;
-    
+    let startY = 0; let currentY = 0;
     modalContent.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
-        modalContent.style.transition = 'none'; // Disable transition during drag
+        modalContent.style.transition = 'none'; 
     }, {passive: true});
 
     modalContent.addEventListener('touchmove', (e) => {
         currentY = e.touches[0].clientY;
         let deltaY = currentY - startY;
-        if (deltaY > 0) { // Only allow swiping down
-            requestAnimationFrame(() => {
-                modalContent.style.transform = `translateY(${deltaY}px)`;
-            });
+        if (deltaY > 0) { 
+            requestAnimationFrame(() => { modalContent.style.transform = `translateY(${deltaY}px)`; });
         }
     }, {passive: true});
 
     modalContent.addEventListener('touchend', (e) => {
-        modalContent.style.transition = 'transform 0.3s ease-out'; // Restore transition
+        modalContent.style.transition = 'transform 0.3s ease-out'; 
         let deltaY = currentY - startY;
-        
-        if (deltaY > 60) {
-            // Threshold passed, close modal
-            toggleModal();
-        } else {
-            // Snap back up
-            requestAnimationFrame(() => {
-                modalContent.style.transform = 'translateY(0)';
-            });
-        }
+        if (deltaY > 60) toggleModal();
+        else requestAnimationFrame(() => { modalContent.style.transform = 'translateY(0)'; });
+    });
+}
+
+// Floating Scroll Logic
+const scrollContainer = document.getElementById('transaction-container');
+const fabScrollBottom = document.getElementById('fab-scroll-bottom');
+if (scrollContainer && fabScrollBottom) {
+    scrollContainer.addEventListener('scroll', () => {
+        const scrolledAmount = Math.abs(scrollContainer.scrollTop);
+        if (scrolledAmount > 150) fabScrollBottom.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+        else fabScrollBottom.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+    });
+    fabScrollBottom.addEventListener('click', () => {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
 // ===============================================
-// 🟢 MAIN SQLITE LOAD EVENT
+// 🟢 3. LOAD DATA & SETUP UI
 // ===============================================
-function loadLedgerData() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        let custId = urlParams.get('id');
+function loadLedgerData(custId) {
+    if(!db) return;
 
-        if(!custId) {
-            history.back(); // Silent exit
-            return;
-        }
-        
-        if(!db) {
-            if(window.showAppToast) window.showAppToast("Database connection failed");
-            return;
-        }
-
-        db.transaction(function(tx) {
-            tx.executeSql('SELECT * FROM customers WHERE id = ?', [custId], function(tx, rs) {
-                if(rs.rows.length === 0) {
-                    let dummyCustomer = { id: custId, name: 'Customer (Unsaved)', balance: 0, transactions: [] };
-                    setupUI(dummyCustomer, custId);
-                    return;
+    db.transaction(function(tx) {
+        tx.executeSql('SELECT * FROM customers WHERE id = ?', [custId], function(tx, rs) {
+            if(rs.rows.length === 0) return AppRouter.goBack();
+            
+            let customer = rs.rows.item(0);
+            currentLedgerCustomerObj = customer; // Save for WA
+            
+            tx.executeSql('SELECT * FROM transactions WHERE customer_id = ? ORDER BY date ASC', [custId], function(tx, txRs) {
+                let transactions = [];
+                for(let i = 0; i < txRs.rows.length; i++) {
+                    let t = txRs.rows.item(i);
+                    try { t.bill_paths = JSON.parse(t.bill_paths || "[]"); } 
+                    catch(e) { t.bill_paths = []; }
+                    transactions.push(t);
                 }
-                
-                let customer = rs.rows.item(0);
-                
-                tx.executeSql('SELECT * FROM transactions WHERE customer_id = ? ORDER BY date ASC', [custId], function(tx, txRs) {
-                    let transactions = [];
-                    for(let i = 0; i < txRs.rows.length; i++) {
-                        let t = txRs.rows.item(i);
-                        try { t.bill_paths = JSON.parse(t.bill_paths || "[]"); } 
-                        catch(e) { t.bill_paths = []; }
-                        transactions.push(t);
-                    }
-                    customer.transactions = transactions;
-                    setupUI(customer, custId);
-                }, function(tx, error) {
-                    if(window.showAppToast) window.showAppToast("Failed to load transactions.");
-                });
-            }, function(tx, error) {
-                if(window.showAppToast) window.showAppToast("Failed to load customer profile.");
+                customer.transactions = transactions;
+                setupUI(customer, custId);
             });
-        }, function(error) {
-            // If the query fails (e.g., empty table), load the empty UI
-            let dummyCustomer = { id: custId, name: 'Customer', balance: 0, transactions: [] };
-            setupUI(dummyCustomer, custId);
         });
-        
-    } catch (e) {
-        if(window.showAppToast) window.showAppToast("App encountered an error.");
-    }
+    });
 }
 
-// ===============================================
-// 🟢 UI SETUP & BATCH RENDERING
-// ===============================================
 function setupUI(customer, custId) {
-    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-    const setHref = (id, url) => { const el = document.getElementById(id); if (el) el.href = url; };
-
-    setText('header-name', customer.name);
-    setText('header-initial', customer.name.charAt(0).toUpperCase());
+    document.getElementById('header-name').textContent = customer.name;
+    document.getElementById('header-initial').textContent = customer.name.charAt(0).toUpperCase();
     
-    const profileLink = document.getElementById('header-profile-link');
-    if (profileLink) profileLink.onclick = () => window.location.href = `profile.html?id=${custId}`;
+    // Links replaced with SPA Routes
+    document.getElementById('header-profile-link').onclick = () => AppRouter.navigate('screen-profile', {id: custId});
+    
+    document.getElementById('receive-btn').onclick = () => AppRouter.navigate('screen-form', {type: 'receive', id: custId});
+    document.getElementById('give-btn').onclick = () => AppRouter.navigate('screen-form', {type: 'given', id: custId});
+    
+    const statementNav = () => AppRouter.navigate('screen-statement', {id: custId});
+    const deleteNav = () => AppRouter.navigate('screen-delete-customer', {id: custId});
+    
+    document.getElementById('strip-statement').onclick = statementNav;
+    document.getElementById('modal-statement').onclick = statementNav;
+    document.getElementById('strip-balance-btn').onclick = statementNav;
+    
+    document.getElementById('strip-delete').onclick = deleteNav;
+    document.getElementById('modal-delete').onclick = deleteNav;
 
-    setHref('receive-btn', `add_entry.html?type=receive&id=${custId}`);
-    setHref('give-btn', `add_entry.html?type=given&id=${custId}`);
-    setHref('strip-delete', `delete_customer.html?id=${custId}`);
-    setHref('strip-statement', `statement.html?id=${custId}`);
-    setHref('modal-statement', `statement.html?id=${custId}`);
-    setHref('modal-delete', `delete_customer.html?id=${custId}`);
-    setHref('strip-balance-btn', `statement.html?id=${custId}`);
-
-    // 🟢 NAVA FIX: Hun patti safe rahegi, entries sirf wrapper ch jangiyan
     const container = document.getElementById('transactions-wrapper');
     if(container) container.innerHTML = '';
     
-    // SAFE DATE PARSER (Optimized for speed)
     const parseDateSafe = (dateVal) => {
         if (!dateVal) return new Date();
         if (!isNaN(dateVal) && String(dateVal).trim() !== "") return new Date(Number(dateVal));
@@ -241,15 +178,11 @@ function setupUI(customer, custId) {
         const d = new Date(dateVal); return isNaN(d.getTime()) ? new Date() : d;
     };
 
-    // Prepare data once in memory
     let running = 0;
     const enrichedTxns = (customer.transactions || []).map(txn => {
         const isGive = txn.type === 'given';
         const isDeleted = (txn.is_deleted == 1 || String(txn.is_deleted) === 'true');
-
-        if (!isDeleted) {
-            running += isGive ? -parseFloat(txn.amount) : parseFloat(txn.amount);
-        }
+        if (!isDeleted) running += isGive ? -parseFloat(txn.amount) : parseFloat(txn.amount);
 
         const d = parseDateSafe(txn.date);
         const dStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/,/g, '');
@@ -270,33 +203,24 @@ function setupUI(customer, custId) {
     const total = running; 
     let pendingImagesLocal = [];
 
-    // 🚀 BATCH RENDER FUNCTION (Fast DOM Updates - WhatsApp Style Reversed)
-    function renderTransactions(txnsToRender) {
+    window.renderLedgerTransactions = function(txnsToRender) {
         if(!container) return;
         
         if (txnsToRender.length === 0) {
-            const searchVal = searchInput ? searchInput.value.trim() : "";
-            if (searchVal !== "") {
-                container.innerHTML = `<div class="flex justify-center items-center h-32 text-gray-500 dark:text-gray-400 text-sm font-medium">No matches found</div>`;
-            } else {
-                container.innerHTML = `<div class="flex flex-col justify-center items-center h-40 opacity-70">
-                    <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">No transactions found</span>
-                </div>`;
-            }
+            container.innerHTML = `<div class="flex flex-col justify-center items-center h-40 opacity-70">
+                <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="text-gray-500 dark:text-gray-400 text-sm font-medium">No transactions found</span>
+            </div>`;
             return;
         }
 
-        // 🟢 ASLI JADOO: Array nu putha (reverse) karo taaki Newest entry DOM ch sab ton upar hove
         const reversedTxns = [...txnsToRender].reverse();
-        
         let htmlStrings = [];
         pendingImagesLocal = [];
 
-        // Loop hun navi entry ton purani entry wal chalega
         for (let i = 0; i < reversedTxns.length; i++) {
             const txn = reversedTxns[i];
-            const uniqueTxnId = txn.id || 'txn_' + Math.random().toString(36).substr(2, 9);
+            const uniqueTxnId = txn.id;
             let cardClasses, innerContent;
 
             if (txn.isDeleted) {
@@ -337,8 +261,7 @@ function setupUI(customer, custId) {
                     <div class="px-4 py-3">
                         <div class="flex items-center justify-between gap-4 w-full">
                             <div class="flex items-center font-bold text-lg text-gray-900 dark:text-gray-100">
-                                ${arrowIcon}
-                                ₹${txn.amount}
+                                ${arrowIcon} ₹${txn.amount}
                             </div>
                             <div class="text-[11px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap self-center text-right">${txn.time}</div>
                         </div>
@@ -346,27 +269,23 @@ function setupUI(customer, custId) {
                     </div>`;
             }
 
-            // Pehlan Card HTML ch pao (DOM ch upar jayega, screen te thalle disega)
+            // SPA Route to Entry Details
             htmlStrings.push(`
                 <div class="mb-5 flex flex-col ${txn.isGive ? 'items-end' : 'items-start'} w-full">
-                    <a href="entry_details.html?id=${uniqueTxnId}&custId=${custId}" class="${cardClasses}">
+                    <a onclick="AppRouter.navigate('screen-entry-details', {id: '${uniqueTxnId}', custId: '${custId}'})" class="${cardClasses} cursor-pointer">
                         ${innerContent}
                     </a>
                     <p class="text-[11px] mt-1.5 font-medium px-1 text-gray-500 dark:text-gray-400 lowercase">${txn.balTxt}</p>
                 </div>`);
 
-            // 🟢 REVERSE DATE LOGIC: Check karo ki AGLI entry (jo us ton purani hai) di date farak hai?
             const nextTxn = reversedTxns[i + 1];
             if (!nextTxn || nextTxn.dStr !== txn.dStr) {
-                // Je date badal gayi (ya eh aakhri entry hai), taan Date Badge la do
                 htmlStrings.push(`<div class="flex justify-center mb-6 mt-2"><span class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm border border-slate-300 dark:border-slate-700 text-xs px-4 py-1.5 rounded-full font-bold tracking-wide">${txn.dStr}</span></div>`);
             }
         }
 
-        // Draw karo ek hi vaar ch
         container.innerHTML = htmlStrings.join('');
 
-        // Images load karo (Koi scroll hack di lod nahi!)
         pendingImagesLocal.forEach(item => {
             const imgElement = document.getElementById(`img-${item.id}`);
             const loadingTxt = document.getElementById(`loading-txt-${item.id}`);
@@ -380,7 +299,7 @@ function setupUI(customer, custId) {
                         if(loadingTxt) loadingTxt.style.display = 'none'; 
                     };
                 }, function() {
-                    if(loadingTxt) loadingTxt.textContent = "Image Missing";
+                    if(loadingTxt) loadingTxt.textContent = "Missing";
                 });
             } else {
                 if(loadingTxt) loadingTxt.textContent = "No Preview";
@@ -388,26 +307,24 @@ function setupUI(customer, custId) {
         });
     }
 
-    renderTransactions(enrichedTxns);
+    window.renderLedgerTransactions(enrichedTxns);
 
     // ===============================================
-    // 🟢 SEARCH LOGIC (Smart Date Filter & Auto Focus)
+    // 🟢 SEARCH LOGIC (Renamed IDs to prevent clash)
     // ===============================================
-    const searchBtn = document.getElementById('search-toggle-btn');
-    const btnCancelSearch = document.getElementById('cancel-search-btn'); 
-    const btnClearSearch = document.getElementById('btn-clear-search');
+    const searchBtn = document.getElementById('ledger-search-toggle-btn');
+    const btnCancelSearch = document.getElementById('ledger-cancel-search-btn'); 
+    const btnClearSearch = document.getElementById('ledger-btn-clear-search');
+    const headerNormal = document.getElementById('ledger-header-normal');
+    const headerSearch = document.getElementById('ledger-header-search');
+    const searchInput = document.getElementById('ledger-search-input');
     
-    const headerNormal = document.getElementById('header-normal');
-    const headerSearch = document.getElementById('header-search');
-    
-    const searchInput = document.getElementById('search-input');
-    const mainFooter = document.getElementById('main-footer');
+    const mainFooter = document.getElementById('ledger-footer');
     const bottomControls = document.getElementById('bottom-controls-container');
     const ledgerMain = document.getElementById('ledger-main');
 
-    window.toggleSearch = function() {
-        if (!isSearchOpen) {
-            // OPEN SEARCH
+    window.toggleLedgerSearch = function() {
+        if (!isLedgerSearchOpen) {
             if (headerNormal) headerNormal.classList.add('opacity-0', 'pointer-events-none');
             if (headerSearch) headerSearch.classList.remove('opacity-0', 'pointer-events-none');
             
@@ -415,12 +332,10 @@ function setupUI(customer, custId) {
             if (bottomControls) bottomControls.style.display = 'none';
             if (ledgerMain) ledgerMain.style.paddingBottom = '0px';
             
-            isSearchOpen = true;
-            // Focus naal mobile keyboard apne aap khulega
+            isLedgerSearchOpen = true;
             if (searchInput) setTimeout(() => searchInput.focus(), 50);
             
         } else {
-            // CLOSE SEARCH
             if (headerSearch) headerSearch.classList.add('opacity-0', 'pointer-events-none');
             if (headerNormal) headerNormal.classList.remove('opacity-0', 'pointer-events-none');
             
@@ -433,33 +348,29 @@ function setupUI(customer, custId) {
                 searchInput.blur();
                 if (btnClearSearch) btnClearSearch.classList.add('hidden');
             }
-            isSearchOpen = false;
-            
-            renderTransactions(enrichedTxns); 
+            isLedgerSearchOpen = false;
+            window.renderLedgerTransactions(enrichedTxns); 
         }
     };
 
-    if(searchBtn) searchBtn.addEventListener('click', window.toggleSearch);
-    if(btnCancelSearch) btnCancelSearch.addEventListener('click', window.toggleSearch);
+    if(searchBtn) searchBtn.addEventListener('click', window.toggleLedgerSearch);
+    if(btnCancelSearch) btnCancelSearch.addEventListener('click', window.toggleLedgerSearch);
 
-    // Clear (X) Button Click Logic
     if (btnClearSearch && searchInput) {
         btnClearSearch.addEventListener('click', () => {
             searchInput.value = '';
             btnClearSearch.classList.add('hidden');
-            searchInput.focus(); // Wapas text box ch ungal rakho
-            renderTransactions(enrichedTxns);
+            searchInput.focus(); 
+            window.renderLedgerTransactions(enrichedTxns);
         });
     }
 
-    // Input Type Logic & Smart Date Match
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
-            
             if (query === "") {
                 if(btnClearSearch) btnClearSearch.classList.add('hidden');
-                renderTransactions(enrichedTxns);
+                window.renderLedgerTransactions(enrichedTxns);
                 return;
             } else {
                 if(btnClearSearch) btnClearSearch.classList.remove('hidden');
@@ -469,57 +380,39 @@ function setupUI(customer, custId) {
                 const amtMatch = String(t.amount).includes(query);
                 const noteMatch = t.actualNote.toLowerCase().includes(query);
                 const typeMatch = t.type && t.type.toLowerCase().includes(query);
-                
                 let dateMatch = false;
                 
-                // FALSE MATCH FIX: Je tusi sirf ek/do number (jivein "6") likhe ne, taan oh saal (2026) check nahi karega
-                // Sirf din check karega (08). Par je tusi "8 jun" likhoge taan poora search chalega.
                 if (!isNaN(query) && query.length < 4) {
                     const dayPart = t.dStr.split(' ')[0]; 
                     dateMatch = dayPart.includes(query);
                 } else {
                     dateMatch = t.dStr.toLowerCase().includes(query);
                 }
-
                 return amtMatch || noteMatch || typeMatch || dateMatch; 
             });
-            renderTransactions(filtered);
+            window.renderLedgerTransactions(filtered);
         });
     }
 
     // ===============================================
-    // 🟢 WHATSAPP & BOTTOM STRIP 
+    // 🟢 WHATSAPP LOGIC
     // ===============================================
-    
-    // Handle Canvas Generator Clicks
     const waClickHandler = (e) => {
         e.preventDefault();
-        
-        // Ensure phone exists before proceeding
-        const phoneStr = customer.phone;
+        const phoneStr = currentLedgerCustomerObj.phone;
         if (!phoneStr || phoneStr.trim() === "") {
             if(window.showAppToast) window.showAppToast("Phone number missing for this customer.");
             return;
         }
-
-        sendWhatsAppReminder(customer.name, total, phoneStr);
+        sendWhatsAppReminder(currentLedgerCustomerObj.name, total, phoneStr);
     };
 
     const stripWaBtn = document.getElementById('strip-wa');
     const modalWaBtn = document.getElementById('modal-wa');
-    
-    if (stripWaBtn) {
-        stripWaBtn.onclick = waClickHandler;
-        stripWaBtn.removeAttribute('target');
-        stripWaBtn.removeAttribute('href');
-    }
-    if (modalWaBtn) {
-        modalWaBtn.onclick = waClickHandler;
-        modalWaBtn.removeAttribute('target');
-        modalWaBtn.removeAttribute('href');
-    }
+    if (stripWaBtn) stripWaBtn.onclick = waClickHandler;
+    if (modalWaBtn) modalWaBtn.onclick = waClickHandler;
 
-    setText('strip-balance-value', `₹${Math.abs(total)}`);
+    document.getElementById('strip-balance-value').textContent = `₹${Math.abs(total)}`;
     
     const sBal = document.getElementById('strip-balance-value');
     const sArrow = document.getElementById('strip-balance-arrow');
@@ -535,47 +428,31 @@ function setupUI(customer, custId) {
             sArrow.setAttribute("class", "w-4 h-4 text-gray-800 dark:text-gray-200");
         }
     }
+    document.getElementById('strip-balance-label').textContent = `Balance ${total < 0 ? 'Due' : (total > 0 ? 'Advance' : 'Settled')}`;
+}
 
-    setText('strip-balance-label', `Balance ${total < 0 ? 'Due' : (total > 0 ? 'Advance' : 'Settled')}`);
-
-} // END OF setupUI Function
-
-// ===============================================
-// 🟢 WHATSAPP TEXT REMINDER (Direct to Contact)
-// ===============================================
 function sendWhatsAppReminder(customerName, amount, customerPhone) {
     if (!window.plugins || !window.plugins.socialsharing) {
         if(window.showAppToast) window.showAppToast("Share plugin not installed.");
         return;
     }
-
-    // Phone Number Formatting (Crucial for WhatsApp intent)
     let formattedPhone = customerPhone.replace(/\D/g, ''); 
-    if (formattedPhone.length === 10) {
-        formattedPhone = '91' + formattedPhone; 
-    }
+    if (formattedPhone.length === 10) formattedPhone = '91' + formattedPhone; 
 
     let waText = "";
     const separator = "━━━━━━━━━━━━━━━━━━━━";
 
-    // Text Formatting based on approved design
     if (amount < 0) {
-        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Payment Due Reminder*\nTotal Amount: *₹${Math.abs(amount)}*\n${separator}\n_Please clear your due amount at the earliest. I appreciate your support._`;
+        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Payment Due Reminder*\nTotal Amount: *₹${Math.abs(amount)}*\n${separator}\n_Please clear your due amount at the earliest._`;
     } else if (amount > 0) {
         waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Advance Balance Update*\nTotal Amount: *₹${Math.abs(amount)}*\n${separator}\n_Your advance balance is safely updated. Thank you!_`;
     } else {
-        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Account Fully Settled*\nTotal Amount: *₹0*\n${separator}\n_Your account is clear. Thank you for your continued association._`;
+        waText = `*Khata App Update*\n${separator}\nTo: ${customerName}\n\n*Account Fully Settled*\nTotal Amount: *₹0*\n${separator}\n_Your account is clear. Thank you._`;
     }
 
-    // Share via Plugin directly to the Receiver's chat
     window.plugins.socialsharing.shareViaWhatsAppToReceiver(
-        formattedPhone, 
-        waText,      // Formatted Text
-        null,        // No Image
-        null,        // No URL
-        function() { console.log("Shared text successfully"); },
-        function(err) { 
-            if(window.showAppToast) window.showAppToast("WhatsApp share failed. Contact might not exist on WhatsApp.");
-        }
+        formattedPhone, waText, null, null,
+        function() { },
+        function(err) { if(window.showAppToast) window.showAppToast("WhatsApp share failed."); }
     );
 }
