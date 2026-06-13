@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Khata App - Home</title>
+    <title>Khata App</title>
     
-    <!-- Link to Master Theme CSS -->
     <link rel="stylesheet" href="assets/css/theme.css">
-    
-    
     <script src="assets/js/theme.js"></script>
 
     <style> 
@@ -19,10 +16,7 @@
             font-weight: 100 900; 
             font-display: swap;
         }
-        
         ::-webkit-scrollbar { display: none; }
-        
-        /* Touch Delay & Highlight Fixes */
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
             -webkit-tap-highlight-color: transparent; 
@@ -31,129 +25,106 @@
         
         .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
         
-        /* Floating Button Animations */
+        /* SPA Screen Setup */
+        .app-screen {
+            display: none; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            background-color: var(--bg-master);
+        }
+        .app-screen.active {
+            display: flex;
+            z-index: 10;
+        }
+
+        /* Animations */
         #fab-container a { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #fab-container span { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; overflow: hidden; white-space: nowrap; }
         #fab-container.shrunk a { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
         #fab-container.shrunk span { max-width: 0 !important; margin-left: 0 !important; opacity: 0 !important; }
-        
-        /* Smooth Transitions for Search UI */
-        .fade-transition {
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .hidden-state {
-            opacity: 0 !important;
-            transform: translateY(-10px) !important;
-            pointer-events: none !important;
-            position: absolute; /* Prevents layout jump when hiding */
-        }
-        
-        .app-locked { opacity: 0; pointer-events: none; }
+        .fade-transition { transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hidden-state { opacity: 0 !important; transform: translateY(-10px) !important; pointer-events: none !important; position: absolute; }
     </style>
 </head>
+<body class="bg-master text-primary antialiased select-none h-[100dvh] overflow-hidden relative transition-colors duration-300">
 
-<body class="bg-master text-primary antialiased select-none h-[100dvh] overflow-hidden flex flex-col transition-colors duration-300 relative">
-
-    <!-- Header Area -->
-    <header class="relative flex-none h-14 bg-master/70 backdrop-blur-xl z-50 flex items-center justify-between px-4 border-b border-line overflow-hidden transition-colors">
+    <div id="screen-home" class="app-screen active">
         
-        <!-- Normal Header -->
-        <div id="header-normal" class="absolute inset-0 flex items-center justify-between px-4 transition-opacity duration-300">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 flex items-center justify-center text-brand">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" class="w-full h-full">
-                        <circle cx="512" cy="512" r="320" fill="currentColor"/>
-                        <g transform="translate(405 372) scale(0.40)">
-                        <path fill="#FFFFFF" d="M45 0H520L480 82H338C360 105 374 132 385 164H545L505 246H384C368 356 291 416 161 420L448 722C458 732 453 741 440 741H318L20 430V330H122C222 330 291 297 323 246H0L40 164H274C246 120 194 82 110 82H5Z"/>
-                        </g>
-                    </svg>
+        <header class="relative flex-none h-14 bg-master/70 backdrop-blur-xl z-50 flex items-center justify-between px-4 border-b border-line overflow-hidden transition-colors">
+            <div id="header-normal" class="absolute inset-0 flex items-center justify-between px-4 transition-opacity duration-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 flex items-center justify-center text-brand">
+                        <svg viewBox="0 0 1024 1024" class="w-full h-full"><circle cx="512" cy="512" r="320" fill="currentColor"/><g transform="translate(405 372) scale(0.40)"><path fill="#FFFFFF" d="M45 0H520L480 82H338C360 105 374 132 385 164H545L505 246H384C368 356 291 416 161 420L448 722C458 732 453 741 440 741H318L20 430V330H122C222 330 291 297 323 246H0L40 164H274C246 120 194 82 110 82H5Z"/></g></svg>
+                    </div>
+                    <h1 class="text-[17px] font-semibold text-primary tracking-wide">Khata App</h1>
                 </div>
-                <h1 class="text-[17px] font-semibold text-primary tracking-wide">Khata App</h1>
-            </div>
-            
-            <button id="search-toggle-btn" class="p-2 -mr-2 text-brand active:scale-[0.98] active:opacity-50 transition-all z-10">
-                <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Search Header -->
-        <div id="header-search" class="absolute top-0 left-0 w-full h-full flex items-center gap-3 px-4 box-border bg-master transition-opacity duration-300 opacity-0 pointer-events-none z-10">
-            <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 min-w-0">
-                <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                
-                <input type="text" id="search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] font-normal text-primary placeholder-gray-500 px-2" placeholder="Search customers...">
-                
-                <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 outline-none flex items-center justify-center">
-                    <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                <button id="search-toggle-btn" class="p-2 -mr-2 text-brand active:scale-[0.98] transition-all z-10">
+                    <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </button>
             </div>
-            <button id="cancel-search-btn" class="text-[17px] text-brand font-normal active:opacity-50 shrink-0 outline-none">
-                Cancel
-            </button>
+            <div id="header-search" class="absolute top-0 left-0 w-full h-full flex items-center gap-3 px-4 box-border bg-master transition-opacity duration-300 opacity-0 pointer-events-none z-10">
+                <div class="flex-1 flex items-center bg-[#E9E9EA] dark:bg-[#1C1C1E] rounded-[10px] pl-3 pr-2 py-1.5 min-w-0">
+                    <svg class="w-[20px] h-[20px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="search-input" class="flex-1 w-0 bg-transparent outline-none text-[17px] text-primary placeholder-gray-500 px-2" placeholder="Search customers...">
+                    <button id="btn-clear-search" class="hidden shrink-0 text-gray-400 p-1 mr-1 active:opacity-50 flex items-center justify-center">
+                        <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <button id="cancel-search-btn" class="text-[17px] text-brand active:opacity-50 shrink-0">Cancel</button>
+            </div>
+        </header>
+
+        <main class="flex-1 px-4 py-4 overflow-y-auto pb-24 relative" id="main-scroll-area">
+            <div id="net-balance-card" class="bg-card rounded-2xl px-5 py-3 flex justify-between items-start mb-4 shadow-sm fade-transition relative z-10">
+                <div>
+                    <h2 class="text-[17px] font-semibold tracking-wide">Net Balance</h2>
+                    <p id="account-count" class="text-[13px] text-secondary mt-0.5 tracking-tight">0 Accounts</p>
+                </div>
+                <div class="text-right">
+                    <p id="total-balance" class="text-[17px] font-semibold leading-tight">₹0</p>
+                    <p id="total-status" class="text-[13px] text-secondary mt-0.5 tracking-tight">Settled</p>
+                </div>
+            </div>
+            <div id="customer-list" class="fade-transition w-full pb-6 z-0 relative"></div>
+        </main>
+
+        <div id="fab-container" class="fixed bottom-[95px] right-4 z-50 fade-transition">
+            <a onclick="AppRouter.navigate('screen-form')" class="flex items-center bg-brand text-white px-5 py-3.5 rounded-full shadow-lg active:scale-[0.98] transition-all cursor-pointer">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                <span class="font-semibold text-[15px] ml-2 tracking-wide">Add Customer</span>
+            </a>
         </div>
 
-
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 px-4 py-4 overflow-y-auto pb-24 relative" id="main-scroll-area">
-        
-        <!-- Net Balance Card -->
-        <div id="net-balance-card" class="bg-card rounded-2xl px-5 py-3 flex justify-between items-start mb-4 shadow-sm transition-all duration-300 fade-transition relative z-10">
-            <div>
-                <h2 class="text-[17px] font-semibold text-primary tracking-wide">Net Balance</h2>
-                <p id="account-count" class="text-[13px] text-secondary mt-0.5 tracking-tight">
-                    0 Accounts
-                </p>
-            </div>
-            <div class="text-right">
-                <p id="total-balance" class="text-[17px] font-semibold text-primary leading-tight">₹0</p>
-                <p id="total-status" class="text-[13px] text-secondary mt-0.5 tracking-tight">Settled</p>
-            </div>
-        </div>
-
-        <!-- Customer List Container -->
-        <div id="customer-list" class="fade-transition w-full pb-6 z-0 relative"></div>
-        
-    </main>
-
-    <!-- Floating Action Button -->
-    <div id="fab-container" class="fixed bottom-[95px] right-4 z-50 fade-transition">
-        <a href="pages/add_customer.html" class="flex items-center bg-brand text-white px-5 py-3.5 rounded-full shadow-lg active:scale-[0.98] active:opacity-70 transition-all">
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span class="font-semibold text-[15px] ml-2 opacity-100 tracking-wide">Add Customer</span>
-        </a>
+        <nav id="bottom-nav" class="fixed bottom-0 w-full bg-master border-t border-line flex justify-around items-center h-[90px] pb-safe z-50">
+            <a class="flex flex-col items-center justify-center w-full h-full text-brand cursor-pointer">
+                <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+            <a onclick="AppRouter.navigate('screen-settings')" class="flex flex-col items-center justify-center w-full h-full text-secondary active:opacity-70 cursor-pointer">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="text-[10px] font-medium">Settings</span>
+            </a>
+        </nav>
     </div>
 
-    <!-- Bottom Tab Bar -->
-    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-master border-t border-line flex justify-around items-center h-[90px] pb-safe z-50">
-        <a href="#" class="flex flex-col items-center justify-center w-full h-full text-brand">
-            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            <span class="text-[10px] font-medium">Home</span>
-        </a>
-        <a href="pages/settings.html" class="flex flex-col items-center justify-center w-full h-full text-secondary active:opacity-70">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <span class="text-[10px] font-medium">Settings</span>
-        </a>
-    </nav>
+    <div id="screen-ledger" class="app-screen">
+        <div class="flex items-center justify-center h-full text-secondary">Customer Account (Loading...)</div>
+    </div>
+    <div id="screen-form" class="app-screen">
+        <div class="flex items-center justify-center h-full text-secondary">Add Customer Form (Loading...)</div>
+    </div>
+    <div id="screen-settings" class="app-screen">
+        <div class="flex items-center justify-center h-full text-secondary">Settings Screen (Loading...)</div>
+    </div>
 
-
-    <script src="assets/js/db.js"></script>
     <script src="cordova.js"></script>
-    <script src="assets/js/ui.js"></script> 
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script src="assets/js/router.js"></script>
     <script src="assets/js/home.js"></script>
 </body>
 </html>
