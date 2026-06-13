@@ -1242,6 +1242,10 @@ video {
   height: 100%;
 }
 
+.h-7 {
+  height: 1.75rem;
+}
+
 .max-h-0 {
   max-height: 0px;
 }
@@ -1389,6 +1393,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-7 {
+  width: 1.75rem;
 }
 
 .min-w-0 {
@@ -3499,6 +3507,10 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-\[26px\] {
+  font-size: 26px;
 }
 
 .font-black {

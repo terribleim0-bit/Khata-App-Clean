@@ -132,9 +132,9 @@ function bindEntryDetailsEventsOnce() {
     document.getElementById('detail-sms-share-btn').addEventListener('click', triggerDetailSMSIntent);
 
     // 7. Edit/Delete Routing (Placeholder for SPA Edit/Delete Screens)
-    document.getElementById('detail-top-edit-link').addEventListener('click', () => AppRouter.navigate('screen-edit-confirm', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
-    document.getElementById('detail-list-edit-btn').addEventListener('click', () => AppRouter.navigate('screen-edit-confirm', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
-    document.getElementById('detail-list-delete-btn').addEventListener('click', () => AppRouter.navigate('screen-delete-warning', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+    document.getElementById('detail-top-edit-link').addEventListener('click', () => AppRouter.navigate('screen-edit-entry', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+    document.getElementById('detail-list-edit-btn').addEventListener('click', () => AppRouter.navigate('screen-edit-entry', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+    document.getElementById('detail-list-delete-btn').addEventListener('click', () => AppRouter.navigate('screen-delete-entry', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
 
     // 8. Swipe Listeners for Preview
     const swipeArea = document.getElementById('detail-preview-swipe-area');
