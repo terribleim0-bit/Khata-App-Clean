@@ -1,70 +1,103 @@
-let currentTxnId = null;
-let currentCustId = null;
-let originalNote = "";
-let foundCustomer = null;
-let foundTxn = null;
-let activePreviewIndex = null;
-let previewStartX = 0;
-let previewEndX = 0;
-const MAX_BILLS = 5;
+// assets/js/entry_details.js
 
-// Nawa tracking variable Modals layi
-let activeModal = null; 
+let detailCurrentTxnId = null;
+let detailCurrentCustId = null;
+let detailOriginalNote = "";
+let detailFoundCustomer = null;
+let detailFoundTxn = null;
+let detailActivePreviewIndex = null;
+let detailPreviewStartX = 0;
+let detailPreviewEndX = 0;
+const DETAIL_MAX_BILLS = 5;
 
-document.addEventListener('deviceready', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    currentTxnId = urlParams.get('id');
-    currentCustId = urlParams.get('custId');
+let detailActiveModal = null; 
+let isDetailInitialized = false;
+
+// ===============================================
+// 🟢 SPA SCREEN HOOK & RESET LOGIC
+// ===============================================
+document.addEventListener('screenChanged', (e) => {
+    if (e.detail.screenId === 'screen-entry-details') {
+        const params = e.detail.params || {};
+        initEntryDetailsScreen(params);
+    }
+});
+
+function initEntryDetailsScreen(params) {
+    detailCurrentTxnId = params.id;
+    detailCurrentCustId = params.custId;
     
-    if(!currentTxnId || !currentCustId) return window.history.back();
+    if(!detailCurrentTxnId || !detailCurrentCustId) {
+        AppRouter.goBack();
+        return;
+    }
 
-    loadTransactionData();
+    // Reset states
+    detailActiveModal = null;
+    detailActivePreviewIndex = null;
+    document.getElementById('detail-quick-note-input').value = "";
+    
+    bindEntryDetailsEventsOnce();
+    loadDetailTransactionData();
+}
 
-    document.getElementById('add-bill-trigger').onclick = () => {
-        // Je delete ho chuki hai taan photo add nahi karni
-        if(foundTxn && (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true')) return;
-        
-        if((foundTxn.bill_paths || []).length >= MAX_BILLS) {
+// ===============================================
+// 🟢 HARDWARE BACK BUTTON (SPA FRIENDLY)
+// ===============================================
+document.addEventListener('backbutton', function (e) {
+    if (!document.getElementById('screen-entry-details').classList.contains('active')) return;
+    
+    if (detailActiveModal) {
+        e.preventDefault();
+        toggleDetailModal(detailActiveModal, false);
+    } else {
+        // AppRouter handles main global back navigation
+    }
+}, false);
+
+// ===============================================
+// 🟢 EVENT BINDING (RUNS ONCE)
+// ===============================================
+function bindEntryDetailsEventsOnce() {
+    if (isDetailInitialized) return;
+
+    // 1. Back Button
+    document.getElementById('detail-back-btn').addEventListener('click', () => {
+        if (detailActiveModal) toggleDetailModal(detailActiveModal, false);
+        else AppRouter.goBack();
+    });
+
+    // 2. Bill Triggers
+    document.getElementById('detail-add-bill-trigger').addEventListener('click', () => {
+        if(detailFoundTxn && (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true')) return;
+        if((detailFoundTxn.bill_paths || []).length >= DETAIL_MAX_BILLS) {
             if(window.showAppToast) showAppToast("Maximum of 5 photos allowed.");
             return;
         }
-        toggleModal('billModal', true);
-    };
+        toggleDetailModal('detail-billModal', true);
+    });
 
-    document.getElementById('cam-capture-btn').onclick = () => captureBillImage(1);
-    document.getElementById('cam-gallery-btn').onclick = () => {
-        document.getElementById('native-gallery-input').click();
-    };
+    document.getElementById('detail-cam-capture-btn').addEventListener('click', () => captureDetailBillImage(1));
+    document.getElementById('detail-cam-gallery-btn').addEventListener('click', () => {
+        document.getElementById('detail-native-gallery-input').click();
+    });
 
-    // Swipe Listeners
-    const swipeArea = document.getElementById('preview-swipe-area');
-    if(swipeArea) {
-        swipeArea.addEventListener('touchstart', e => {
-            previewStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-        
-        swipeArea.addEventListener('touchend', e => {
-            previewEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-    }
-
-    // Native Gallery Input Listener
-    document.getElementById('native-gallery-input').addEventListener('change', function(e) {
+    // 3. Gallery Input
+    document.getElementById('detail-native-gallery-input').addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
         if (!files || files.length === 0) return;
 
-        const billPaths = foundTxn.bill_paths || [];
-        const availableSlots = MAX_BILLS - billPaths.length;
+        const billPaths = detailFoundTxn.bill_paths || [];
+        const availableSlots = DETAIL_MAX_BILLS - billPaths.length;
 
         if (files.length > availableSlots) {
-            history.back(); // Modal band karan layi
+            toggleDetailModal('detail-billModal', false);
             if(window.showAppToast) showAppToast(`You can only add ${availableSlots} more photos.`);
             this.value = ''; 
             return; 
         }
 
-        history.back(); // Modal band karan layi
+        toggleDetailModal('detail-billModal', false);
 
         files.forEach((file, i) => {
             if (window.cordova && cordova.file) {
@@ -72,161 +105,171 @@ document.addEventListener('deviceready', () => {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
                     dirEntry.getFile(uniqueFileName, { create: true, exclusive: false }, function(fileEntry) {
                         fileEntry.createWriter(function(fileWriter) {
-                            fileWriter.onwriteend = function() {
-                                attachBillToData(fileEntry.name);
-                            };
-                            fileWriter.onerror = function() { console.error("Gallery save failed"); };
+                            fileWriter.onwriteend = function() { attachDetailBillToData(fileEntry.name); };
                             fileWriter.write(file); 
                         });
                     });
                 });
-            } else {
-                let fakeName = "web_mock_gal_" + Date.now() + "_" + i + ".jpg";
-                attachBillToData(fakeName);
-            }
+            } else { attachDetailBillToData("web_mock_gal_" + Date.now() + "_" + i + ".jpg"); }
         });
         this.value = ''; 
     });
 
-    document.getElementById('preview-delete-btn').onclick = () => deleteActiveImage();
-    document.getElementById('sms-share-btn').onclick = () => triggerSMSIntent();
+    // 4. Notes Trigger
+    document.getElementById('detail-note-edit-link').addEventListener('click', () => {
+        if(detailFoundTxn && (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true')) return;
+        document.getElementById('detail-quick-note-input').value = detailOriginalNote;
+        toggleDetailModal('detail-noteModal', true);
+    });
 
-    setupSwipeToClose();
-}, false);
+    document.getElementById('detail-save-note-btn').addEventListener('click', saveDetailNote);
 
+    // 5. Preview Buttons
+    document.getElementById('detail-preview-back-btn').addEventListener('click', () => toggleDetailModal('detail-imagePreviewModal', false));
+    document.getElementById('detail-preview-delete-btn').addEventListener('click', deleteDetailActiveImage);
 
-function loadTransactionData() {
-    if(!window.db) return window.history.back();
+    // 6. Share Buttons
+    document.getElementById('detail-sms-share-btn').addEventListener('click', triggerDetailSMSIntent);
+
+    // 7. Edit/Delete Routing (Placeholder for SPA Edit/Delete Screens)
+    document.getElementById('detail-top-edit-link').addEventListener('click', () => AppRouter.navigate('screen-edit-confirm', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+    document.getElementById('detail-list-edit-btn').addEventListener('click', () => AppRouter.navigate('screen-edit-confirm', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+    document.getElementById('detail-list-delete-btn').addEventListener('click', () => AppRouter.navigate('screen-delete-warning', {id: detailCurrentTxnId, custId: detailCurrentCustId}));
+
+    // 8. Swipe Listeners for Preview
+    const swipeArea = document.getElementById('detail-preview-swipe-area');
+    if(swipeArea) {
+        swipeArea.addEventListener('touchstart', e => {
+            detailPreviewStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        swipeArea.addEventListener('touchend', e => {
+            detailPreviewEndX = e.changedTouches[0].screenX;
+            handleDetailSwipe();
+        }, { passive: true });
+    }
+
+    setupDetailSwipeToClose();
+    isDetailInitialized = true;
+}
+
+// ===============================================
+// 🟢 LOAD DATA & UPDATE UI
+// ===============================================
+function loadDetailTransactionData() {
+    if(!window.db) { AppRouter.goBack(); return; }
 
     db.transaction(function(tx) {
-        tx.executeSql('SELECT * FROM customers WHERE id = ?', [currentCustId], function(tx, custRs) {
-            if (custRs.rows.length === 0) return window.history.back();
-            foundCustomer = custRs.rows.item(0);
+        tx.executeSql('SELECT * FROM customers WHERE id = ?', [detailCurrentCustId], function(tx, custRs) {
+            if (custRs.rows.length === 0) { AppRouter.goBack(); return; }
+            detailFoundCustomer = custRs.rows.item(0);
 
-            tx.executeSql('SELECT * FROM transactions WHERE id = ?', [currentTxnId], function(tx, txnRs) {
-                if (txnRs.rows.length === 0) return window.history.back();
+            tx.executeSql('SELECT * FROM transactions WHERE id = ?', [detailCurrentTxnId], function(tx, txnRs) {
+                if (txnRs.rows.length === 0) { AppRouter.goBack(); return; }
                 
-                foundTxn = txnRs.rows.item(0);
-                try {
-                    foundTxn.bill_paths = JSON.parse(foundTxn.bill_paths || "[]");
-                } catch(e) {
-                    foundTxn.bill_paths = [];
-                }
+                detailFoundTxn = txnRs.rows.item(0);
+                try { detailFoundTxn.bill_paths = JSON.parse(detailFoundTxn.bill_paths || "[]"); } 
+                catch(e) { detailFoundTxn.bill_paths = []; }
                 
-                updateUI(); 
+                updateDetailUI(); 
             });
         });
     });
 }
 
-
-function updateUI() {
-    document.getElementById('header-name').textContent = foundCustomer.name;
+function updateDetailUI() {
+    document.getElementById('detail-header-name').textContent = detailFoundCustomer.name;
     
     const amtEl = document.getElementById('detail-amount');
     const badgeEl = document.getElementById('detail-type-badge');
-    const isGiven = foundTxn.type === 'given';
+    const isGiven = detailFoundTxn.type === 'given';
+    const isDeleted = (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true');
     
-    // 🟢 Check Delete Status
-    const isDeleted = (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true');
-    
-    amtEl.textContent = foundTxn.amount;
+    amtEl.textContent = detailFoundTxn.amount;
     badgeEl.classList.remove('hidden'); 
     
+    const topEdit = document.getElementById('detail-top-edit-link');
+    const listEditBtn = document.getElementById('detail-list-edit-btn');
+    const listDeleteBtn = document.getElementById('detail-list-delete-btn');
+    const previewDelBtn = document.getElementById('detail-preview-delete-btn');
+    const noteEditLink = document.getElementById('detail-note-edit-link');
+
     if (isDeleted) {
-        // Deleted UI
         amtEl.className = 'text-5xl font-bold tracking-tight ml-1 text-muted line-through decoration-2';
         badgeEl.textContent = isGiven ? 'GIVEN (DELETED)' : 'GOT (DELETED)';
         badgeEl.className = 'text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border text-muted border-line bg-master';
         
-        // Hide Top Edit Link
-        const topEdit = document.getElementById('top-edit-link');
         if(topEdit) topEdit.style.display = 'none';
-
-        // Disable Note Editing
-        const noteEditLink = document.getElementById('note-edit-link');
+        if(listEditBtn) listEditBtn.style.display = 'none';
+        if(listDeleteBtn) listDeleteBtn.style.display = 'none';
+        if(previewDelBtn) previewDelBtn.style.display = 'none';
+        
         if(noteEditLink) {
-            noteEditLink.onclick = null; 
             noteEditLink.classList.remove('active:bg-black/5', 'dark:active:bg-white/5', 'cursor-pointer');
         }
 
-        // 🟢 THE FIX: ਸਿਰਫ ਬਟਨ ਲੁਕਾਉਣੇ ਹਨ, ਪੂਰਾ ਡੱਬਾ ਨਹੀਂ!
-        const listEditBtn = document.getElementById('list-edit-btn');
-        if(listEditBtn) listEditBtn.style.display = 'none';
-        
-        const listDeleteBtn = document.getElementById('list-delete-btn');
-        if(listDeleteBtn) listDeleteBtn.style.display = 'none';
-
-        // Hide Delete icon in Image Preview
-        const previewDelBtn = document.getElementById('preview-delete-btn');
-        if(previewDelBtn) previewDelBtn.style.display = 'none';
-
-        // 🟢 Show "Deleted On" Row cleanly
-        if (foundTxn.deleted_on) {
-            const delCont = document.getElementById('deleted-container');
+        if (detailFoundTxn.deleted_on) {
+            const delCont = document.getElementById('detail-deleted-container');
             if(delCont) delCont.classList.remove('hidden');
-            const delDate = new Date(Number(foundTxn.deleted_on));
+            const delDate = new Date(Number(detailFoundTxn.deleted_on));
             document.getElementById('detail-deleted-date').textContent = `${delDate.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${delDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
         }
-
     } else {
-        // Normal UI (Using new theme colors)
         amtEl.className = `text-5xl font-bold tracking-tight ml-1 ${isGiven ? 'text-status-red' : 'text-status-green'}`;
         badgeEl.textContent = isGiven ? 'YOU GAVE' : 'YOU GOT';
         badgeEl.className = `text-[10px] font-bold uppercase tracking-[2px] px-3 py-1 rounded-full mb-3 border ${isGiven ? 'text-status-red border-status-red/30 bg-status-red/10' : 'text-status-green border-status-green/30 bg-status-green/10'}`;
+        
+        if(topEdit) topEdit.style.display = 'flex';
+        if(listEditBtn) listEditBtn.style.display = 'flex';
+        if(listDeleteBtn) listDeleteBtn.style.display = 'flex';
+        if(previewDelBtn) previewDelBtn.style.display = 'block';
     }
 
-    // 🟢 Note Logic
+    // Note Logic
     const noteEl = document.getElementById('detail-note');
-    originalNote = (foundTxn.note || "").trim();
-    if (originalNote && originalNote.toLowerCase() !== "received" && originalNote.toLowerCase() !== "given") {
-        noteEl.textContent = originalNote;
+    detailOriginalNote = (detailFoundTxn.note || "").trim();
+    if (detailOriginalNote && detailOriginalNote.toLowerCase() !== "received" && detailOriginalNote.toLowerCase() !== "given") {
+        noteEl.textContent = detailOriginalNote;
         noteEl.classList.remove('text-muted');
         noteEl.classList.add('text-primary'); 
     } else {
         noteEl.textContent = isDeleted ? "No note added." : "Tap to add a note...";
         noteEl.classList.add('text-muted');
         noteEl.classList.remove('text-primary');
-        originalNote = "";
+        detailOriginalNote = "";
     }
 
-    // 🟢 Added On Logic
-    const d = new Date(Number(foundTxn.date));
+    // Date Logic
+    const d = new Date(Number(detailFoundTxn.date));
     document.getElementById('detail-date').textContent = `${d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
 
-    // 🟢 Edited On Logic
-    if (foundTxn.is_edited && foundTxn.edited_on) {
-        const e = new Date(Number(foundTxn.edited_on));
-        const edCont = document.getElementById('edited-container');
+    if (detailFoundTxn.is_edited && detailFoundTxn.edited_on) {
+        const e = new Date(Number(detailFoundTxn.edited_on));
+        const edCont = document.getElementById('detail-edited-container');
         if(edCont) edCont.classList.remove('hidden');
         document.getElementById('detail-edited-date').textContent = `${e.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} at ${e.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
     }
 
-    // 🟢 Links & Buttons
-    const editUrl = `edit_confirm.html?id=${currentTxnId}&custId=${foundCustomer.id}`;
-    const delUrl = `delete_warning.html?id=${currentTxnId}&custId=${foundCustomer.id}`; 
-    document.getElementById('top-edit-link').href = editUrl;
-    document.getElementById('list-edit-btn').href = editUrl;
-    document.getElementById('list-delete-btn').href = delUrl;
-    
-    const deleteTextEl = document.getElementById('delete-text');
+    const deleteTextEl = document.getElementById('detail-delete-text');
     if(deleteTextEl) deleteTextEl.textContent = `Delete ${isGiven ? 'Given' : 'Received'} Entry`;
 
-    renderBillsGallery(isDeleted);
-    buildWhatsAppShareLink(isDeleted);
+    renderDetailBillsGallery(isDeleted);
+    buildDetailWhatsAppShareLink(isDeleted);
 }
 
-
-function renderBillsGallery(isDeleted = false) {
-    const billPaths = foundTxn.bill_paths || [];
-    const counterEl = document.getElementById('bill-counter');
-    const container = document.getElementById('bills-thumb-container');
+// ===============================================
+// 🟢 BILLS & GALLERY LOGIC
+// ===============================================
+function renderDetailBillsGallery(isDeleted = false) {
+    const billPaths = detailFoundTxn.bill_paths || [];
+    const counterEl = document.getElementById('detail-bill-counter');
+    const container = document.getElementById('detail-bills-thumb-container');
     
-    counterEl.textContent = `${billPaths.length}/${MAX_BILLS}`;
+    counterEl.textContent = `${billPaths.length}/${DETAIL_MAX_BILLS}`;
     container.innerHTML = '';
 
-    const triggerBox = document.getElementById('add-bill-trigger');
-    if (isDeleted || billPaths.length >= MAX_BILLS) {
+    const triggerBox = document.getElementById('detail-add-bill-trigger');
+    if (isDeleted || billPaths.length >= DETAIL_MAX_BILLS) {
         if(triggerBox) triggerBox.style.display = 'none';
     } else {
         if(triggerBox) triggerBox.style.display = 'flex';
@@ -237,20 +280,18 @@ function renderBillsGallery(isDeleted = false) {
     billPaths.forEach((fileName, index) => {
         const thumb = document.createElement('div');
         thumb.className = 'shrink-0 w-[64px] h-[64px] rounded-xl overflow-hidden bg-gray-200 dark:bg-zinc-800 relative border border-gray-300 dark:border-zinc-700 active:scale-90 transition-transform cursor-pointer flex items-center justify-center';
-        
         thumb.innerHTML = `
-            <span id="loading-txt-${index}" class="absolute text-[9px] text-gray-500 dark:text-gray-400 font-medium">Loading...</span>
+            <span id="detail-loading-txt-${index}" class="absolute text-[9px] text-gray-500 dark:text-gray-400 font-medium">Loading...</span>
             <img id="detail-thumb-${index}" src="${emptyPixel}" class="absolute inset-0 w-full h-full object-cover z-0 opacity-0 transition-opacity duration-300" alt="Bill">
         `;
-        
-        thumb.onclick = () => launchFullScreenPreview(index);
+        thumb.onclick = () => launchDetailFullScreenPreview(index);
         container.appendChild(thumb);
     });
 
     setTimeout(() => {
         billPaths.forEach((fileName, index) => {
             const imgNode = document.getElementById(`detail-thumb-${index}`);
-            const loadingTxt = document.getElementById(`loading-txt-${index}`);
+            const loadingTxt = document.getElementById(`detail-loading-txt-${index}`);
             if (!imgNode) return;
 
             if (window.cordova && cordova.file && cordova.file.dataDirectory) {
@@ -274,32 +315,34 @@ function renderBillsGallery(isDeleted = false) {
     }, 150);
 }
 
-
-function launchFullScreenPreview(index) {
-    activePreviewIndex = index;
-    toggleModal('imagePreviewModal', true);
-    renderPreviewScreen();
+function launchDetailFullScreenPreview(index) {
+    detailActivePreviewIndex = index;
+    toggleDetailModal('detail-imagePreviewModal', true);
+    renderDetailPreviewScreen();
 }
 
-function renderPreviewScreen() {
-    const billPaths = foundTxn.bill_paths || [];
-    if (billPaths.length === 0) return history.back(); 
+function renderDetailPreviewScreen() {
+    const billPaths = detailFoundTxn.bill_paths || [];
+    if (billPaths.length === 0) {
+        toggleDetailModal('detail-imagePreviewModal', false);
+        return; 
+    }
     
-    if (activePreviewIndex >= billPaths.length) activePreviewIndex = billPaths.length - 1;
-    if (activePreviewIndex < 0) activePreviewIndex = 0;
+    if (detailActivePreviewIndex >= billPaths.length) detailActivePreviewIndex = billPaths.length - 1;
+    if (detailActivePreviewIndex < 0) detailActivePreviewIndex = 0;
 
-    const fileName = billPaths[activePreviewIndex];
-    const fullImgNode = document.getElementById('full-preview-img');
+    const fileName = billPaths[detailActivePreviewIndex];
+    const fullImgNode = document.getElementById('detail-full-preview-img');
 
     if (window.cordova && cordova.file && cordova.file.dataDirectory) {
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory + fileName, function(fileEntry) {
             fullImgNode.src = fileEntry.toInternalURL();
         }, function() { fullImgNode.src = ""; });
     } else {
-        fullImgNode.src = "https://via.placeholder.com/400x600/1a73e8/FFFFFF?text=Bill+" + (activePreviewIndex + 1);
+        fullImgNode.src = "https://via.placeholder.com/400x600/1a73e8/FFFFFF?text=Bill+" + (detailActivePreviewIndex + 1);
     }
 
-    const thumbContainer = document.getElementById('preview-thumbnails-container');
+    const thumbContainer = document.getElementById('detail-preview-thumbnails-container');
     thumbContainer.innerHTML = '';
     
     if (billPaths.length <= 1) {
@@ -310,9 +353,8 @@ function renderPreviewScreen() {
     }
 
     billPaths.forEach((path, i) => {
-        const is_active = (i === activePreviewIndex);
+        const is_active = (i === detailActivePreviewIndex);
         const thumb = document.createElement('img');
-        
         thumb.className = `w-12 h-12 object-cover rounded-xl transition-all duration-300 cursor-pointer shrink-0 ${is_active ? 'border-[2.5px] border-brand scale-110 opacity-100 shadow-lg' : 'border border-gray-500 opacity-50 scale-100 active:scale-95'}`;
         
         if (window.cordova && cordova.file) {
@@ -325,64 +367,61 @@ function renderPreviewScreen() {
 
         thumb.onclick = (e) => {
             e.stopPropagation();
-            activePreviewIndex = i;
-            renderPreviewScreen();
+            detailActivePreviewIndex = i;
+            renderDetailPreviewScreen();
         };
         thumbContainer.appendChild(thumb);
     });
 }
 
-
-function handleSwipe() {
+function handleDetailSwipe() {
     const threshold = 50; 
-    const billPaths = foundTxn.bill_paths || [];
+    const billPaths = detailFoundTxn.bill_paths || [];
     
-    if (previewEndX < previewStartX - threshold) {
-        if (activePreviewIndex < billPaths.length - 1) {
-            activePreviewIndex++;
-            renderPreviewScreen();
+    if (detailPreviewEndX < detailPreviewStartX - threshold) {
+        if (detailActivePreviewIndex < billPaths.length - 1) {
+            detailActivePreviewIndex++;
+            renderDetailPreviewScreen();
         }
     }
-    if (previewEndX > previewStartX + threshold) {
-        if (activePreviewIndex > 0) {
-            activePreviewIndex--;
-            renderPreviewScreen();
+    if (detailPreviewEndX > detailPreviewStartX + threshold) {
+        if (detailActivePreviewIndex > 0) {
+            detailActivePreviewIndex--;
+            renderDetailPreviewScreen();
         }
     }
 }
 
-
-function deleteActiveImage() {
-    if (activePreviewIndex === null) return;
-    if(foundTxn && (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true')) {
+function deleteDetailActiveImage() {
+    if (detailActivePreviewIndex === null) return;
+    if(detailFoundTxn && (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true')) {
         if(window.showAppToast) showAppToast("Cannot delete image from deleted entry.");
         return;
     }
 
-    foundTxn.bill_paths.splice(activePreviewIndex, 1);
-    const updatedPathsStr = JSON.stringify(foundTxn.bill_paths);
+    detailFoundTxn.bill_paths.splice(detailActivePreviewIndex, 1);
+    const updatedPathsStr = JSON.stringify(detailFoundTxn.bill_paths);
 
     db.transaction(function(tx) {
-        tx.executeSql('UPDATE transactions SET bill_paths = ? WHERE id = ?', [updatedPathsStr, currentTxnId], function(tx, rs) {
+        tx.executeSql('UPDATE transactions SET bill_paths = ? WHERE id = ?', [updatedPathsStr, detailCurrentTxnId], function(tx, rs) {
             if(window.showAppToast) showAppToast("Image Deleted Successfully");
             
-            if (foundTxn.bill_paths.length === 0) {
-                history.back(); 
+            if (detailFoundTxn.bill_paths.length === 0) {
+                toggleDetailModal('detail-imagePreviewModal', false);
             } else {
-                renderPreviewScreen(); 
+                renderDetailPreviewScreen(); 
             }
-            loadTransactionData(); 
+            loadDetailTransactionData(); 
         });
     });
 }
 
-
-function captureBillImage(sourceType) {
-    if(foundTxn && (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true')) return;
+function captureDetailBillImage(sourceType) {
+    if(detailFoundTxn && (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true')) return;
 
     if (!window.cordova || !navigator.camera) {
-        attachBillToData("mock_native_file_" + Date.now() + ".jpg");
-        history.back();
+        attachDetailBillToData("mock_native_file_" + Date.now() + ".jpg");
+        toggleDetailModal('detail-billModal', false);
         return;
     }
 
@@ -392,48 +431,133 @@ function captureBillImage(sourceType) {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
                     let uniqueFileName = "khata_bill_dt_" + Date.now() + ".jpg";
                     fileEntry.copyTo(dirEntry, uniqueFileName, function(newFileEntry) {
-                        attachBillToData(newFileEntry.name);
+                        attachDetailBillToData(newFileEntry.name);
                         if(window.showAppToast) showAppToast("Image Added Successfully");
-                        history.back(); 
-                    }, function() { alert("File save failed!"); history.back(); });
-                }, function() { alert("Directory error!"); history.back(); });
-            }, function() { alert("Image error!"); history.back(); });
+                        toggleDetailModal('detail-billModal', false);
+                    }, function() { alert("File save failed!"); toggleDetailModal('detail-billModal', false); });
+                }, function() { alert("Directory error!"); toggleDetailModal('detail-billModal', false); });
+            }, function() { alert("Image error!"); toggleDetailModal('detail-billModal', false); });
         },
-        function(cancel) { console.log("Camera cancelled"); history.back(); },
+        function(cancel) { console.log("Camera cancelled"); toggleDetailModal('detail-billModal', false); },
         { quality: 60, destinationType: Camera.DestinationType.FILE_URI, sourceType: sourceType, correctOrientation: true }
     );
 }
 
-function attachBillToData(savedFileName) {
-    foundTxn.bill_paths = foundTxn.bill_paths || [];
-    foundTxn.bill_paths.push(savedFileName);
-    const updatedPathsStr = JSON.stringify(foundTxn.bill_paths);
+function attachDetailBillToData(savedFileName) {
+    detailFoundTxn.bill_paths = detailFoundTxn.bill_paths || [];
+    detailFoundTxn.bill_paths.push(savedFileName);
+    const updatedPathsStr = JSON.stringify(detailFoundTxn.bill_paths);
 
     db.transaction(function(tx) {
-        tx.executeSql('UPDATE transactions SET bill_paths = ? WHERE id = ?', [updatedPathsStr, currentTxnId], function(tx, rs) {
-            loadTransactionData(); 
+        tx.executeSql('UPDATE transactions SET bill_paths = ? WHERE id = ?', [updatedPathsStr, detailCurrentTxnId], function(tx, rs) {
+            loadDetailTransactionData(); 
         });
     });
 }
 
+// ===============================================
+// 🟢 NOTES & MODAL ENGINE
+// ===============================================
+function saveDetailNote() {
+    const newNote = document.getElementById('detail-quick-note-input').value.trim();
+    const finalNote = newNote || (detailFoundTxn.type === 'given' ? 'Given' : 'Received');
+    const currentTime = Date.now();
 
-function buildWhatsAppShareLink(isDeleted = false) {
-    const d = new Date(Number(foundTxn.date));
-    const dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-    let statusLabel = foundTxn.type === 'given' ? 'Given (Debit)' : 'Received (Credit)';
-    
-    if (isDeleted) {
-        statusLabel += " [DELETED]";
+    db.transaction(function(tx) {
+        tx.executeSql('UPDATE transactions SET note = ?, is_edited = ?, edited_on = ? WHERE id = ?', 
+            [finalNote, 1, currentTime, detailCurrentTxnId], 
+            function(tx, rs) {
+                toggleDetailModal('detail-noteModal', false);
+                if(window.showAppToast) showAppToast("Note Updated Successfully");
+                loadDetailTransactionData(); 
+            }, 
+            function(tx, error) {
+                if(window.showAppToast) showAppToast("Failed to update note");
+            }
+        );
+    });
+}
+
+function toggleDetailModal(modalId, show) {
+    const m = document.getElementById(modalId);
+    if(!m) return;
+    const c = m.querySelector('.modal-content') || m.querySelector('div.relative.w-full.max-w-lg');
+
+    if(show) {
+        m.classList.remove('hidden');
+        if(c && modalId !== 'detail-imagePreviewModal') {
+            c.style.transform = '';
+            setTimeout(() => c.classList.remove('translate-y-full'), 10);
+        } else {
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        }
+        if(modalId === 'detail-noteModal') setTimeout(() => document.getElementById('detail-quick-note-input').focus(), 300);
+        detailActiveModal = modalId;
+    } else {
+        if(modalId === 'detail-noteModal') document.getElementById('detail-quick-note-input').blur(); 
+        if(c && modalId !== 'detail-imagePreviewModal') {
+            c.style.transform = ''; 
+            c.classList.add('translate-y-full'); 
+            setTimeout(() => m.classList.add('hidden'), 300); 
+        } else {
+            m.classList.add('opacity-0');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+        detailActiveModal = null;
     }
+}
+
+function setupDetailSwipeToClose() {
+    const overlays = document.querySelectorAll('#screen-entry-details .modal-overlay, #detail-imagePreviewModal.bg-black\\/90');
+    overlays.forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if(e.target === overlay && detailActiveModal) toggleDetailModal(detailActiveModal, false);
+        });
+    });
+
+    document.querySelectorAll('#screen-entry-details .modal-content').forEach(modal => {
+        let startY = 0; let isDragging = false;
+        modal.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY; isDragging = true; modal.style.transition = 'none';
+        }, { passive: true });
+        modal.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const diffY = e.touches[0].clientY - startY;
+            if (diffY > 0) modal.style.transform = `translateY(${diffY}px)`;
+        }, { passive: true });
+        modal.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diffY = e.changedTouches[0].clientY - startY;
+            modal.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; 
+            if (diffY > 100) { 
+                if (detailActiveModal) toggleDetailModal(detailActiveModal, false);
+                setTimeout(() => { modal.style.transform = ''; }, 300);
+            } else {
+                modal.style.transform = ''; 
+            }
+        }, { passive: true });
+    });
+}
+
+// ===============================================
+// 🟢 SHARE & SMS
+// ===============================================
+function buildDetailWhatsAppShareLink(isDeleted = false) {
+    const d = new Date(Number(detailFoundTxn.date));
+    const dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+    let statusLabel = detailFoundTxn.type === 'given' ? 'Given (Debit)' : 'Received (Credit)';
+    
+    if (isDeleted) statusLabel += " [DELETED]";
 
     let noteText = "";
-    if (originalNote) noteText = `\n📝 Note: ${originalNote}`;
+    if (detailOriginalNote) noteText = `\n📝 Note: ${detailOriginalNote}`;
 
-    let message = `*Khata App Transaction Details*\n\n👤 Customer: ${foundCustomer.name}\n💰 Amount: ₹${foundTxn.amount}\n📊 Status: ${statusLabel}\n📅 Date: ${dateStr}${noteText}`;
+    let message = `*Khata App Transaction Details*\n\n👤 Customer: ${detailFoundCustomer.name}\n💰 Amount: ₹${detailFoundTxn.amount}\n📊 Status: ${statusLabel}\n📅 Date: ${dateStr}${noteText}`;
     const encodedMsg = encodeURIComponent(message);
     
-    let cleanedPhone = (foundCustomer.phone || "").replace(/[^0-9]/g, "");
-    const waBtn = document.getElementById('wa-share-btn');
+    let cleanedPhone = (detailFoundCustomer.phone || "").replace(/[^0-9]/g, "");
+    const waBtn = document.getElementById('detail-wa-share-btn');
 
     if (cleanedPhone) {
         if (cleanedPhone.length === 10) cleanedPhone = "91" + cleanedPhone;
@@ -443,147 +567,20 @@ function buildWhatsAppShareLink(isDeleted = false) {
     }
 }
 
-
-function triggerSMSIntent() {
-    const d = new Date(Number(foundTxn.date));
+function triggerDetailSMSIntent() {
+    const d = new Date(Number(detailFoundTxn.date));
     const dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-    let statusLabel = foundTxn.type === 'given' ? 'Given' : 'Received';
+    let statusLabel = detailFoundTxn.type === 'given' ? 'Given' : 'Received';
     
-    const isDeleted = (foundTxn.is_deleted == 1 || String(foundTxn.is_deleted) === 'true');
-    if (isDeleted) {
-        statusLabel += " (Deleted)";
-    }
+    const isDeleted = (detailFoundTxn.is_deleted == 1 || String(detailFoundTxn.is_deleted) === 'true');
+    if (isDeleted) statusLabel += " (Deleted)";
     
-    let message = `Hisaab Notification: ₹${foundTxn.amount} ${statusLabel} on ${dateStr} via Khata App.`;
-    let phone = foundCustomer.phone || "";
+    let message = `Hisaab Notification: ₹${detailFoundTxn.amount} ${statusLabel} on ${dateStr} via Khata App.`;
+    let phone = detailFoundCustomer.phone || "";
     
     if(window.cordova) {
         window.location.href = `sms:${phone}?body=${encodeURIComponent(message)}`;
     } else {
         window.open(`sms:${phone};?&body=${encodeURIComponent(message)}`);
     }
-}
-
-
-function toggleModal(modalId, show) {
-    const m = document.getElementById(modalId);
-    if(!m) return;
-    const c = m.querySelector('.modal-content');
-
-    if(show) {
-        m.classList.remove('hidden');
-        if(c) {
-            c.style.transform = '';
-            setTimeout(() => c.classList.remove('translate-y-full'), 10);
-        } else {
-            setTimeout(() => m.classList.remove('opacity-0'), 10);
-        }
-        if(modalId === 'noteModal') setTimeout(() => document.getElementById('quick-note-input').focus(), 300);
-        history.pushState({ modalOpen: true }, '');
-        activeModal = modalId;
-    } else {
-        if(modalId === 'noteModal') document.getElementById('quick-note-input').blur(); 
-        if(c) {
-            c.style.transform = ''; 
-            c.classList.add('translate-y-full'); 
-            setTimeout(() => m.classList.add('hidden'), 300); 
-        } else {
-            m.classList.add('opacity-0');
-            setTimeout(() => m.classList.add('hidden'), 300);
-        }
-        activeModal = null;
-    }
-}
-
-
-window.addEventListener('popstate', (e) => {
-    if (activeModal) {
-        const m = document.getElementById(activeModal);
-        if(m) {
-            const c = m.querySelector('.modal-content');
-            if(activeModal === 'noteModal') document.getElementById('quick-note-input').blur(); 
-            
-            if(c) {
-                c.style.transform = '';
-                c.classList.add('translate-y-full'); 
-                setTimeout(() => m.classList.add('hidden'), 300); 
-            } else {
-                m.classList.add('opacity-0');
-                setTimeout(() => m.classList.add('hidden'), 300);
-            }
-        }
-        if(activeModal === 'imagePreviewModal') activePreviewIndex = null;
-        activeModal = null;
-    }
-});
-
-function openNoteModal() {
-    document.getElementById('quick-note-input').value = originalNote;
-    toggleModal('noteModal', true);
-}
-
-window.saveNote = function() {
-    const newNote = document.getElementById('quick-note-input').value.trim();
-    const finalNote = newNote || (foundTxn.type === 'given' ? 'Given' : 'Received');
-    const currentTime = Date.now();
-
-    db.transaction(function(tx) {
-        tx.executeSql('UPDATE transactions SET note = ?, is_edited = ?, edited_on = ? WHERE id = ?', 
-            [finalNote, 1, currentTime, currentTxnId], 
-            function(tx, rs) {
-                history.back(); // Modal band karan layi
-                if(window.showAppToast) showAppToast("Note Updated Successfully");
-                loadTransactionData(); 
-            }, 
-            function(tx, error) {
-                if(window.showAppToast) showAppToast("Failed to update note");
-            }
-        );
-    });
-};
-
-
-function setupSwipeToClose() {
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', () => {
-            if (activeModal) history.back();
-        });
-    });
-
-    document.querySelectorAll('.modal-content').forEach(modal => {
-        let startY = 0;
-        let isDragging = false;
-
-        modal.addEventListener('touchstart', (e) => {
-            startY = e.touches[0].clientY;
-            isDragging = true;
-            modal.style.transition = 'none';
-        }, { passive: true });
-
-        modal.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const currentY = e.touches[0].clientY;
-            const diffY = currentY - startY;
-            
-            if (diffY > 0) {
-                modal.style.transform = `translateY(${diffY}px)`;
-            }
-        }, { passive: true });
-
-        modal.addEventListener('touchend', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            const endY = e.changedTouches[0].clientY;
-            const diffY = endY - startY;
-
-            modal.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'; 
-
-            if (diffY > 100) { 
-                if (activeModal) history.back();
-                setTimeout(() => { modal.style.transform = ''; }, 300);
-            } else {
-                modal.style.transform = ''; 
-            }
-        }, { passive: true });
-    });
 }
