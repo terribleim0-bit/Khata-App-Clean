@@ -153,9 +153,9 @@ function setupUI(customer, custId) {
     // Links replaced with SPA Routes
     document.getElementById('header-profile-link').onclick = () => AppRouter.navigate('screen-profile', {id: custId});
     
-    document.getElementById('receive-btn').onclick = () => AppRouter.navigate('screen-form', {type: 'receive', id: custId});
-    document.getElementById('give-btn').onclick = () => AppRouter.navigate('screen-form', {type: 'given', id: custId});
-    
+    document.getElementById('receive-btn').onclick = () => AppRouter.navigate('screen-entry', {type: 'receive', custId: custId});
+    document.getElementById('give-btn').onclick = () => AppRouter.navigate('screen-entry', {type: 'given', custId: custId});
+
     const statementNav = () => AppRouter.navigate('screen-statement', {id: custId});
     const deleteNav = () => AppRouter.navigate('screen-delete-customer', {id: custId});
     

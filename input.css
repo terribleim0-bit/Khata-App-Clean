@@ -53,3 +53,75 @@
     --bg-fab-active: #4B5563;
     --bg-strip-header: rgba(10, 132, 255, 0.10);
 }
+/* =========================================
+   KEYPAD & ENTRY SCREEN STYLES
+   ========================================= */
+:root {
+    --key-num-bg: #f2f8f8; 
+    --key-num-text: #111827;
+    --key-op-bg: #e7f4ea; 
+    --key-op-text: #166534;
+    --key-eq-bg: #c2e4c9; 
+    --key-eq-text: #14532d;
+    --key-bs-bg: #ffebed; 
+    --key-bs-text: #ef4444;
+    --cursor-color: #111827; 
+    --icon-color: #445b5b;
+}
+
+.dark {
+    --key-num-bg: #1c1c1e; 
+    --key-num-text: #f3f4f6;
+    --key-op-bg: #143120; 
+    --key-op-text: #4ade80; 
+    --key-eq-bg: #166534; 
+    --key-eq-text: #86efac;
+    --key-bs-bg: #451a1a; 
+    --key-bs-text: #f87171;
+    --cursor-color: #ffffff; 
+    --icon-color: #9ca3af;
+}
+
+.key-btn { 
+    border-radius: 12px; 
+    font-size: 24px; 
+    font-weight: 600; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    height: 58px; 
+    transition: all 0.1s ease; 
+}
+.key-btn:active { transform: scale(0.92); opacity: 0.8; }
+
+.key-num { background-color: var(--key-num-bg); color: var(--key-num-text); }
+.key-op { background-color: var(--key-op-bg); color: var(--key-op-text); }
+.key-eq { background-color: var(--key-eq-bg); color: var(--key-eq-text); }
+.key-backspace { background-color: var(--key-bs-bg); color: var(--key-bs-text); }
+
+.cursor { 
+    display: inline-block; 
+    width: 2px; 
+    height: 44px; 
+    background-color: var(--cursor-color); 
+    animation: blink 1s step-end infinite; 
+    vertical-align: middle; 
+    margin-left: 5px; 
+}
+
+@keyframes blink { 
+    0%, 100% { opacity: 1; } 
+    50% { opacity: 0; } 
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    width: 100%; 
+    height: 100%; 
+    opacity: 0; 
+    cursor: pointer; 
+}
