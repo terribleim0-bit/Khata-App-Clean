@@ -760,6 +760,10 @@ video {
   top: 1.5rem;
 }
 
+.top-4 {
+  top: 1rem;
+}
+
 .isolate {
   isolation: isolate;
 }
@@ -2949,6 +2953,10 @@ video {
 .bg-yellow-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 252 232 / var(--tw-bg-opacity, 1));
+}
+
+.bg-status-red {
+  background-color: var(--status-red);
 }
 
 .bg-gradient-to-b {

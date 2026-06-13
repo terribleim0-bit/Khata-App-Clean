@@ -110,7 +110,7 @@
             </a>
         </nav>
     </div>
-
+    <!-- START: LEDGER -->
     <div id="screen-ledger" class="app-screen">
         
         <header class="relative bg-master/80 backdrop-blur-xl border-b border-line shrink-0 z-40 h-[60px] overflow-hidden transition-colors">
@@ -243,7 +243,9 @@
             </div>
         </div>
     </div>
-
+    <!-- END: LEDGER -->
+    
+    <!-- START: FORM -->
     <div id="screen-form" class="app-screen">
         <header class="relative bg-master/70 backdrop-blur-xl border-b border-line shrink-0 z-50 h-14 overflow-hidden transition-colors">
             <div id="form-header-normal" class="absolute inset-0 flex items-center justify-between px-4 transition-opacity duration-300">
@@ -353,6 +355,9 @@
             </div>
         </div>
     </div>
+    <!-- END: FORM -->
+    
+    <!-- START: ENTRY -->
     <div id="screen-entry" class="app-screen">
         
         <header class="relative bg-master/70 backdrop-blur-xl border-b border-line shrink-0 z-50 h-[60px] overflow-hidden transition-colors flex items-center justify-between px-4">
@@ -482,6 +487,9 @@
             </div>
         </div>
     </div>
+    <!-- END: ENTRY -->
+    
+    <!-- START: ENTRY DETAILS-->
     <div id="screen-entry-details" class="app-screen">
         <header class="relative bg-master/80 backdrop-blur-xl border-b border-line shrink-0 z-40 h-[60px] flex items-center justify-between px-4 transition-colors">
             <button id="detail-back-btn" class="p-2 -ml-2 text-brand active:opacity-50 transition-opacity z-10 shrink-0">
@@ -644,7 +652,65 @@
             </div>
         </footer>
     </div>
+    <!-- END: ENTRY DETAILS-->
     
+    <!-- START: EDIT ENTRY -->
+    <div id="screen-edit-entry" class="app-screen">
+        <header class="relative bg-master/70 backdrop-blur-xl border-b border-line shrink-0 z-50 h-[60px] flex items-center gap-4 px-4 transition-colors">
+            <button id="edit-back-btn" class="text-brand active:opacity-50 transition-opacity p-1 -ml-2 shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <div class="flex flex-col flex-1 min-w-0">
+                <h1 id="edit-header-name" class="text-[16px] font-bold text-primary truncate leading-tight">Edit Amount</h1>
+                <p id="edit-header-date" class="text-[11px] font-semibold tracking-wide text-secondary truncate">Loading...</p>
+            </div>
+            <div id="edit-type-badge" class="ml-auto text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border shrink-0 hidden">EDIT</div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto px-5 py-6 flex flex-col items-center justify-center relative">
+            <p id="edit-error-msg" class="text-status-red text-[12px] font-bold mb-4 hidden uppercase tracking-wider h-4 absolute top-4"></p>
+
+            <div class="w-full text-center mb-6">
+                <div id="edit-amount-container" class="text-5xl font-bold flex justify-center items-center transition-colors text-brand">
+                    <span>₹</span>
+                    <span id="edit-amount-display">0</span>
+                    <span class="cursor"></span>
+                </div>
+                <div id="edit-amount-underline" class="h-[3px] w-32 mx-auto mt-4 rounded-full opacity-40 transition-colors bg-brand"></div>
+            </div>
+        </main>
+
+        <div id="edit-action-container" class="hidden px-3 mb-4 flex flex-col gap-3 shrink-0 transition-all duration-300">
+            <button id="edit-save-btn" class="w-full text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 text-[16px] tracking-wide transition-transform active:scale-95 bg-brand">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                Save Changes
+            </button>
+        </div>
+
+        <div id="edit-keypad" class="grid grid-cols-4 gap-2 px-3 pb-safe bg-card pt-3 border-t border-line z-10">
+            <button class="key-btn key-num" data-val="7">7</button>
+            <button class="key-btn key-num" data-val="8">8</button>
+            <button class="key-btn key-num" data-val="9">9</button>
+            <button class="key-btn key-backspace" data-val="back">⌫</button>
+            
+            <button class="key-btn key-num" data-val="4">4</button>
+            <button class="key-btn key-num" data-val="5">5</button>
+            <button class="key-btn key-num" data-val="6">6</button>
+            <button class="key-btn key-op" data-val="*">×</button>
+            
+            <button class="key-btn key-num" data-val="1">1</button>
+            <button class="key-btn key-num" data-val="2">2</button>
+            <button class="key-btn key-num" data-val="3">3</button>
+            <button class="key-btn key-op" data-val="-">−</button>
+            
+            <button class="key-btn key-num" data-val=".">.</button>
+            <button class="key-btn key-num" data-val="0">0</button>
+            <button class="key-btn key-eq" data-val="=">=</button>
+            <button class="key-btn key-op" data-val="+">+</button>
+        </div>
+    </div>
+    <!-- END: EDIT ENTRY -->
+
 
 
     <script src="cordova.js"></script>
